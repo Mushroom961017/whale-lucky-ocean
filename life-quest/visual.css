@@ -50,3 +50,19 @@ dialog:has(.draw-sequence),dialog:has(.prize-reveal){padding:0;overflow:hidden;b
 .scene[data-cat=social]{background-image:linear-gradient(#39859b55,#1e4b6044),url("world.svg")}
 .scene[data-cat=other]{background-image:linear-gradient(#4e409155,#252b5244),url("world.svg")}
 .scene[data-cat=health]{background-image:linear-gradient(#4e927655,#203d4144),url("world.svg")}
+
+/* High-detail pixel-fantasy visual assets. */
+.scene[data-cat]{background-image:linear-gradient(#151d2a22,#161d3055),url("battle-hd.webp");background-size:cover;background-position:center 62%;image-rendering:auto}
+.scene[data-cat=study]{background-image:linear-gradient(#28244122,#18243d44),url("battle-hd.webp")}
+.scene[data-cat=fitness]{background-image:linear-gradient(#743d3b33,#37293a44),url("battle-hd.webp")}
+.scene[data-cat=career]{background-image:linear-gradient(#65442b22,#2a293544),url("battle-hd.webp")}
+.scene[data-cat=finance]{background-image:linear-gradient(#aa7b2522,#42352a44),url("battle-hd.webp")}
+.scene[data-cat=creative]{background-image:linear-gradient(#633d8833,#34294a44),url("battle-hd.webp")}
+.scene[data-cat=social]{background-image:linear-gradient(#286d8c33,#1e435044),url("battle-hd.webp")}
+.scene[data-cat=other]{background-image:linear-gradient(#3e347c33,#29234344),url("battle-hd.webp")}
+.scene[data-cat=health]{background-image:linear-gradient(#287d5933,#233d3244),url("battle-hd.webp")}
+.scene .sprite img{width:150px;height:172px;object-fit:contain;image-rendering:auto;filter:drop-shadow(3px 5px 4px #111a22)}
+.scene .sprite.monster{transform:none}.scene .sprite.monster img{width:190px;height:176px}
+.map-banner{height:clamp(200px,40vw,465px);background:url("map-hd.webp") center/cover no-repeat;border:5px solid #8b795e;box-shadow:inset 0 0 0 3px #d8bf8b,5px 5px 0 #10192b;margin-bottom:18px}
+.world-map{background:linear-gradient(#44443bdc,#293443ed),url("map-hd.webp") center/cover}
+@media(max-width:700px){.scene .sprite img{width:100px;height:120px}.scene .sprite.monster img{width:130px;height:125px}.map-banner{height:220px}}
