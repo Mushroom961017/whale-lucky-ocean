@@ -1,4 +1,4 @@
-import {prizes,initial,validate,draw,setPrizes} from './logic.mjs';
+import {prizes,initial,validate,draw,setPrizes} from './logic.mjs?v=2';
 const defaultConfig=prizes.map(p=>({...p}));
 const $=s=>document.querySelector(s), KEY='whale-lucky-ocean-v1';let state, busy=false, soundOn=true, audio, corrupted=false;const machine=$('#machine'), dialog=$('#result');
 function toast(t){const el=$('#notice');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),4000)}
