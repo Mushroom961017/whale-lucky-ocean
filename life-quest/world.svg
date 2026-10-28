@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges">
+<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#273b60"/><stop offset=".65" stop-color="#8aa39b"/><stop offset="1" stop-color="#d9b77e"/></linearGradient></defs>
+<rect width="960" height="420" fill="url(#sky)"/><rect x="694" y="54" width="55" height="55" fill="#f2db9e"/><rect x="682" y="66" width="79" height="31" fill="#f2db9e" opacity=".5"/>
+<g fill="#e9dfc2" opacity=".5"><path d="M76 71h46v-8h41v8h31v10H76zM447 34h31v-9h36v9h27v8h-94zM790 116h38v-7h44v7h28v9H790z"/></g>
+<path fill="#617e88" d="M0 202h50v-18h50v-22h31v-25h39v25h25v21h42v21h42v-15h30v-31h30v-30h28v30h30v23h32v21h47v-17h30v-30h30v-21h29v21h32v26h25v21h56v-19h30v-28h29v-29h28v29h31v24h35v24h64v-27h27v-22h28v-29h29v29h29v22h34v27h36v218H0z"/>
+<path fill="#415d65" d="M0 223h50v-20h62v-18h42v18h38v20h75v-16h49v-13h51v13h40v16h57v-15h53v-19h49v19h39v15h54v-22h60v-15h44v15h42v22h58v-15h40v-19h50v19h55v15h42v197H0z"/>
+<g><path fill="#3c4558" d="M400 205V118h12V80h13V61h16v19h13v38h13v87z"/><path fill="#c4b59b" d="M407 201v-80h12V86h28v35h13v80z"/><path fill="#715e65" d="M417 87h32l-16-32z"/><path fill="#f5d485" d="M429 102h8v14h-8zm-11 34h8v16h-8zm23 0h8v16h-8z"/><path fill="#3d4958" d="M388 185h90v17h-90z"/></g>
+<path fill="#294d4c" d="M0 252h40v-35h22v-30h19v30h24v35h40v-24h23v-31h20v31h25v24h56v-28h23v-36h18v36h26v28h50v-22h22v-33h19v33h23v22h53v-28h25v-42h18v42h25v28h60v-24h20v-36h20v36h24v24h56v-27h22v-32h19v32h24v27h51v-24h25v-37h20v37h24v24h49v-22h22v-30h20v30h25v22h55v-35h22v-32h18v32h25v35h38v168H0z"/>
+<path fill="#52715f" d="M0 280h960v140H0z"/><path fill="#3a594e" d="M0 309h960v111H0z"/><path fill="#a49c7a" d="M0 338h960v82H0z"/><path fill="#716e64" d="M0 355h960v65H0z"/>
+<g fill="#c7bd93"><path d="M30 345h52v5H30zm116 0h61v5h-61zm134 0h59v5h-59zm160 0h57v5h-57zm130 0h62v5h-62zm146 0h55v5h-55zm141 0h62v5h-62z"/></g><g fill="#777568"><path d="M0 374h960v4H0zm0 30h960v4H0zM90 358h4v18h-4zm143 19h4v29h-4zm128-19h4v18h-4zm122 19h4v29h-4zm138-19h4v18h-4zm140 19h4v29h-4zm135-19h4v18h-4z"/></g>
+<g fill="#f9e4a7"><path d="M114 147h4v4h-4zm250-34h4v4h-4zm195 26h4v4h-4zm248 24h4v4h-4z"/></g>
+</svg>
