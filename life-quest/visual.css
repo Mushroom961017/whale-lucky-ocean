@@ -39,3 +39,14 @@ dialog:has(.draw-sequence),dialog:has(.prize-reveal){padding:0;overflow:hidden;b
 @keyframes ring{to{transform:rotate(360deg)}}@keyframes ticket{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-12px) rotate(4deg)}}@keyframes stars{to{opacity:.4;transform:scale(1.08)}}@keyframes prize-in{from{opacity:0;transform:scale(.1) rotate(-20deg)}to{opacity:1;transform:scale(1) rotate(0)}}@keyframes legendary-glow{to{transform:scale(1.12);filter:drop-shadow(0 0 36px #fff9c9)}}
 @media(prefers-reduced-motion:reduce){.draw-ticket,.draw-ring,.reveal-rays,.prize-icon,.draw-stars,.prize-sparkles,.sprite{animation:none}}
 @media(max-width:700px){.scene{min-height:250px}.sprite img{width:88px;height:112px}.battle-info{min-width:100px}.world-map{padding:12px}.draw-sequence,.prize-reveal{min-height:330px}}
+
+/* Layered landscape keeps the foreground legible across regions. */
+.scene[data-cat]{background-image:linear-gradient(#171f3a22,#14253a33),url("world.svg");background-size:cover;background-position:center;image-rendering:pixelated}
+.scene[data-cat=study]{background-image:linear-gradient(#3b336455,#202b4444),url("world.svg")}
+.scene[data-cat=fitness]{background-image:linear-gradient(#7d403d55,#4b283944),url("world.svg")}
+.scene[data-cat=career]{background-image:linear-gradient(#72533e55,#36334044),url("world.svg")}
+.scene[data-cat=finance]{background-image:linear-gradient(#b5823a44,#4e392b44),url("world.svg")}
+.scene[data-cat=creative]{background-image:linear-gradient(#8056a855,#3c305344),url("world.svg")}
+.scene[data-cat=social]{background-image:linear-gradient(#39859b55,#1e4b6044),url("world.svg")}
+.scene[data-cat=other]{background-image:linear-gradient(#4e409155,#252b5244),url("world.svg")}
+.scene[data-cat=health]{background-image:linear-gradient(#4e927655,#203d4144),url("world.svg")}
