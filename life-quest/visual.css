@@ -82,3 +82,7 @@ dialog:has(.tutorial){max-width:600px;width:min(92vw,600px);max-height:90vh;over
 @media(max-width:999px){.draw-tiers{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.draw-summary{gap:10px}.page-turner{display:none}.draw-heading{align-items:start;flex-direction:column}.draw-button{margin-left:0}}
 
 .modal-turner{position:sticky;bottom:0;z-index:6;display:flex;justify-content:center;gap:8px;padding:7px;background:#172236ed;border-top:1px solid #758396}.modal-turner[hidden]{display:none!important}.modal-turner button{padding:5px 12px;font-size:12px}
+
+
+/* Individual reward artwork: consistent square pixel-art framing. */
+.detail-row{align-items:center;padding:4px 8px}.detail-row b{flex:1}.detail-art{width:54px;height:54px;object-fit:cover;border:1px solid #c2a46d;image-rendering:pixelated}.last-one{display:flex;align-items:center;gap:5px}.last-art{width:35px;height:35px;object-fit:cover;border:1px solid #b99c66;image-rendering:pixelated}.inventory-art{width:80px;height:80px;object-fit:cover;border:2px solid #b99c66;image-rendering:pixelated;float:right;margin:0 0 8px 8px}.reveal-item-art{width:130px;height:130px;object-fit:cover;border:2px solid #e1c988;box-shadow:0 0 25px #d7ad5d77;image-rendering:pixelated}.prize-reveal .prize-icon{width:130px}
