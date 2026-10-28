@@ -1,0 +1,1 @@
+.reveal.legendary{animation:legendary 0.8s steps(3) infinite alternate;filter:drop-shadow(0 0 20px #fff080)}@keyframes legendary{from{transform:scale(.95) rotate(-5deg);filter:drop-shadow(0 0 8px #ffb836)}to{transform:scale(1.2) rotate(5deg);filter:drop-shadow(0 0 32px #fff7a9)}}

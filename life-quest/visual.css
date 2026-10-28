@@ -1,0 +1,41 @@
+/* Original CSS art; no external assets or network requests. */
+:root{--gold:#f9d27b;--accent:#8de2cb}
+body{background:radial-gradient(ellipse at 50% -10%,#3c5770 0,#1b283b 40%,#0d1422 100%);background-attachment:fixed}
+header{box-shadow:0 5px 0 #0a1222,0 8px 22px #090e1b88}
+header strong{text-shadow:2px 2px #7b5429;letter-spacing:3px}
+.panel,.card{border-color:#697589;background:linear-gradient(145deg,#2b3a53,#1b2539);box-shadow:inset 0 0 0 2px #172133,4px 4px 0 #0a101b}
+.card:hover{border-color:#bda677}
+button{transition:filter .15s,transform .15s}button:active{transform:translate(2px,2px)}
+button.primary{background:linear-gradient(#b48a4e,#775329);border-color:#e9c985}
+.scene{isolation:isolate;min-height:330px;border:5px solid #777f8b;box-shadow:inset 0 0 0 4px #d8c49b55,5px 5px #0d1522;position:relative}
+.scene:before{content:"✦　　✧　　　✦　　　✧　　 ✦";color:#f6e8bc99;z-index:-1;top:12%;font-size:19px;text-shadow:4px 4px #6c6c7a}
+.scene:after{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:0;height:35%;background:repeating-linear-gradient(0deg,transparent 0 18px,#1d342c66 18px 20px),repeating-linear-gradient(90deg,transparent 0 46px,#1d342c55 46px 48px);opacity:.6}
+.battle-info{position:relative;z-index:1;min-width:130px;text-shadow:2px 2px #182332;font-weight:bold}
+.battle-info:before{content:"";position:absolute;bottom:19px;left:8%;width:84%;height:14px;background:#14212588;border-radius:50%;z-index:-1}
+.battle-info b,.battle-info>span:last-child{display:block;position:relative;background:#141b2cdd;padding:4px 8px;border:1px solid #758098}
+.sprite img{width:128px;height:154px;filter:drop-shadow(4px 4px #1c243d);image-rendering:pixelated}
+.world-map{position:relative;gap:14px;padding:20px;background:radial-gradient(ellipse at center,#617d76,#35495a);border:4px solid #a69b78;box-shadow:inset 0 0 0 5px #273949}
+.world-map:before{content:"艾特拉大陸";grid-column:1/-1;letter-spacing:6px;text-align:center;color:#f8de9f;font-weight:bold;font-size:22px;text-shadow:2px 3px #30404a}
+.region{background:linear-gradient(150deg,#3d5361ed,#222e43f4);position:relative;overflow:hidden;border-color:#96a99a}
+.region:after{content:"✦";position:absolute;right:14px;bottom:10px;color:#e3c98555;font-size:30px}
+.region h2{font-size:18px}.prize .icon{filter:drop-shadow(2px 4px #11192a)}
+dialog:has(.draw-sequence),dialog:has(.prize-reveal){padding:0;overflow:hidden;border:4px solid #e5c77f;background:#121a30;box-shadow:0 0 0 6px #2c3450,0 0 55px #e0b25977}
+.draw-sequence,.prize-reveal{position:relative;min-height:360px;padding:34px 20px 24px;text-align:center;overflow:hidden;background:radial-gradient(circle,#574967 0,#252c4a 44%,#11182d 80%)}
+.draw-sequence:before,.prize-reveal:before{content:"";position:absolute;inset:12px;border:2px solid #caaa6b70;pointer-events:none}
+.draw-stars{position:absolute;left:0;right:0;top:24px;color:#ffe298;letter-spacing:12px;animation:stars 1s steps(2) infinite}
+.draw-ring{position:absolute;top:54px;left:50%;width:205px;height:205px;margin-left:-102px;border:4px double #ffe08c;border-radius:50%;box-shadow:0 0 16px #ffd86b,inset 0 0 18px #f3c570;animation:ring 2s linear infinite}
+.draw-ticket{position:relative;margin:65px auto 34px;width:154px;height:110px;display:flex;flex-direction:column;justify-content:center;gap:5px;border:4px solid #fff0c7;background:linear-gradient(135deg,#f1ce81,#bd8f4e);color:#4a3041;box-shadow:0 0 0 4px #9b6e46,0 0 40px #ffda79;animation:ticket 1s steps(3) infinite alternate}
+.draw-ticket span{font-size:10px;letter-spacing:2px}.draw-ticket b{font-size:26px}.draw-ticket small{color:#6d4751;font-weight:bold}
+.draw-sequence h2{position:relative;margin:8px 0;color:#ffe5a9}.draw-sequence p{margin:0;color:#c6c8d9}
+.skip-animation,.reward-accept{display:block;margin:12px auto 18px}
+.prize-reveal{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px}
+.reveal-rays{position:absolute;width:420px;height:420px;background:repeating-conic-gradient(from 0deg,#fbe8a755 0 7deg,transparent 7deg 20deg);animation:ring 14s linear infinite;mask-image:radial-gradient(circle,#000 0,transparent 67%)}
+.prize-sparkles{color:#ffe68c;font-size:28px;z-index:1;letter-spacing:12px;animation:stars 1s steps(2) infinite}
+.prize-icon{z-index:1;font-size:84px;filter:drop-shadow(0 0 13px #f9d97e);animation:prize-in .65s cubic-bezier(.2,1.5,.4,1)}
+.prize-label{z-index:1;color:#ffe3a4;font-weight:bold;letter-spacing:5px}.prize-reveal h1,.prize-reveal p{z-index:1;margin:0}
+.rarity-A{background:radial-gradient(circle,#a57e4e,#504067 40%,#10172d 78%)}
+.rarity-A .prize-icon{filter:drop-shadow(0 0 30px #fff3aa);animation:prize-in .65s cubic-bezier(.2,1.5,.4,1),legendary-glow 1s steps(2) infinite alternate}
+.rarity-B,.rarity-C{background:radial-gradient(circle,#625792,#34365e 45%,#12182d 80%)}
+@keyframes ring{to{transform:rotate(360deg)}}@keyframes ticket{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-12px) rotate(4deg)}}@keyframes stars{to{opacity:.4;transform:scale(1.08)}}@keyframes prize-in{from{opacity:0;transform:scale(.1) rotate(-20deg)}to{opacity:1;transform:scale(1) rotate(0)}}@keyframes legendary-glow{to{transform:scale(1.12);filter:drop-shadow(0 0 36px #fff9c9)}}
+@media(prefers-reduced-motion:reduce){.draw-ticket,.draw-ring,.reveal-rays,.prize-icon,.draw-stars,.prize-sparkles,.sprite{animation:none}}
+@media(max-width:700px){.scene{min-height:250px}.sprite img{width:88px;height:112px}.battle-info{min-width:100px}.world-map{padding:12px}.draw-sequence,.prize-reveal{min-height:330px}}
