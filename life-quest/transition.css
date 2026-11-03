@@ -1,0 +1,6 @@
+/* Navigation feedback stays subtle and does not delay interaction. */
+nav button{transition:background-color .18s ease,color .18s ease,filter .18s ease}
+nav button:hover{background-color:#293c51;color:#fff0c0}
+nav button:focus-visible{outline:2px solid #f6d793;outline-offset:-3px}
+nav button.active{box-shadow:inset 0 -3px #e2bd77}
+@media(prefers-reduced-motion:reduce){nav button{transition:none}}
