@@ -22,6 +22,12 @@ test('貼上計畫後先預覽，確認後才入庫，重複匯入被拒絕',asy
  try{
   await import('./app.js?mobile-ui-test');await new Promise(r=>setTimeout(r,25));
   let act=async(name,data={})=>{let b={dataset:{action:name,...data},disabled:false,isConnected:true};await click({target:{closest:()=>b}})};
+  assert.equal((node('#nav').innerHTML.match(/class="art-icon nav-art art-index-/g)||[]).length,8);
+  assert.match(node('#nav').innerHTML,/data-page="adventure"/);assert.match(node('#nav').innerHTML,/冒險賞/);
+  let mapNavigation={dataset:{page:'map'},disabled:false,isConnected:true};await click({target:{closest:()=>mapNavigation}});
+  assert.equal((node('#main').innerHTML.match(/class="map-location"/g)||[]).length,8);
+  for(const category of ['study','fitness','career','finance','health','creative','social','other'])assert.match(node('#main').innerHTML,new RegExp('region-'+category));
+  await act('region-open',{region:'study'});assert.match(node('#modal-content').innerHTML,/智慧圖書館/);node('#modal').close();
   let navigation={dataset:{page:'tasks'},disabled:false,isConnected:true};await click({target:{closest:()=>navigation}});
   assert.match(node('#main').innerHTML,/用 GPT 規劃/);assert.match(node('#main').innerHTML,/未來七日計畫/);
   let date=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Taipei'});
