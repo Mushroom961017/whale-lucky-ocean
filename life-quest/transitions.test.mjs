@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createTransitions} from './transitions.js';
 
-function fixture(reduce = false) {
+function fixture(reduce = false,doc = undefined) {
   const animations = [];
   function element() {
     return {
@@ -23,7 +23,7 @@ function fixture(reduce = false) {
     trigger() {this.callback();}
   }
   const motion={matches:reduce};
-  const controller=createTransitions({modal,content,motion,Observer});
+  const controller=createTransitions({modal,content,motion,Observer,doc});
   return {controller,animations,modal,content,motion,observer};
 }
 
@@ -53,3 +53,16 @@ test('關閉動畫期間若視窗內容更新，不會誤關新的畫面', () =>
 test('不支援 Web Animations 時仍可關閉視窗', () => {
   const f=fixture();delete f.modal.animate;f.controller.close();assert.equal(f.modal.open,false);
 });
+test('瀏覽器不支援過場或使用減少動態時，立即切換頁面',()=>{
+ const a=fixture(false,{});let n=0;a.controller.navigate(()=>n++);assert.equal(n,1);
+ const b=fixture(true,{startViewTransition(){throw Error('不應執行')}});b.controller.navigate(()=>n++);assert.equal(n,2);
+});
+test('快速切換只套用最後目的地，並取消前一個畫面過場',()=>{
+ let callbacks=[],views=[];const doc={startViewTransition(fn){callbacks.push(fn);let view={skipTransition(){view.skipped=true},ready:Promise.resolve(),finished:Promise.resolve()};views.push(view);return view}};
+ let f=fixture(false,doc),visited=[];f.controller.navigate(()=>visited.push('a'));f.controller.navigate(()=>visited.push('b'));
+ assert.equal(views[0].skipped,true);callbacks[0]();callbacks[1]();assert.deepEqual(visited,['b']);
+});
+test('過場 API 無法啟動時仍能正常導航',()=>{
+ let f=fixture(false,{startViewTransition(){throw Error('unavailable')}}),called=0;f.controller.navigate(()=>called++);assert.equal(called,1);
+});
+

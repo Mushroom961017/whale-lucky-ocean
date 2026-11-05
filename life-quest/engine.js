@@ -1,6 +1,7 @@
 export const CATEGORIES={
  study:['智慧圖書館','知識守衛者','📚'],fitness:['鋼鐵競技場','鋼鐵巨人','⚔️'],career:['工匠堡壘','機械統領','⚒️'],finance:['黃金商業城','貪婪魔像','💰'],health:['生命森林','迷霧精靈','🌲'],creative:['靈感工坊','幻彩傀儡','🎨'],social:['旅人港口','沉默騎士','⛵'],other:['冒險試煉塔','混沌守門人','🗼']};
 export const REWARDS={easy:[15,20],normal:[25,40],hard:[40,70],milestone:[80,120],outcome:[150,180]};
+export const STARTER_NT=2000;
 export const PRIZES=[
  {tier:'A',name:'星辰聖劍',kind:'equipment',slot:'weapon',stats:{atk:22,crit:0.08},count:1,icon:'🗡️'},
  {tier:'B',name:'雷霆突襲',kind:'active',power:2.8,cooldown:4,count:2,icon:'⚡'},
@@ -22,6 +23,20 @@ export const ENHANCE_COST=80;
 export function fresh(){return {version:1,character:'',exp:0,balance:0,earned:0,spent:0,goals:[],transactions:[],claims:{},inventory:[],equipped:{},skills:[],autoPotion:true,round:1,pool:PRIZES.map(p=>p.count),activeGoal:null,battle:null,history:[]}}
 export function level(s){return 1+Math.floor(s.exp/100)}
 export function uuid(){return crypto.randomUUID()}
+// Character creation and the single starter credit are saved in one IndexedDB transaction.
+export function createCharacter(s,name,now=new Date().toISOString()){
+ const clean=typeof name==='string'?name.trim():'';
+ if(!clean)throw Error('請輸入角色名稱');
+ if(s.character)throw Error('角色已建立');
+ const sourceId='starter:welcome',key=JSON.stringify(['system',sourceId]);
+ const already=Boolean(s.claims[key])||s.transactions.some(t=>t.sourceId===sourceId);
+ if(!already&&(!Number.isSafeInteger(s.balance+STARTER_NT)||!Number.isSafeInteger(s.earned+STARTER_NT)))throw Error('台幣帳本超出上限');
+ s.character=clean;
+ if(already)return {granted:0};
+ const id=uuid();s.claims[key]=id;s.balance+=STARTER_NT;s.earned+=STARTER_NT;
+ s.transactions.push({id,type:'starter',sourceId,nt:STARTER_NT,exp:0,at:now});
+ return {granted:STARTER_NT,id};
+}
 export function normalize(raw,category){
  if(!raw || typeof raw!=='object'||!raw.goalId||!raw.goalTitle||!raw.startDate||!raw.deadline)throw Error('缺少 goalId、goalTitle、startDate 或 deadline');
  const cat=category||raw.goalCategory;if(!CATEGORIES[cat])throw Error('請選擇有效的目標分類');
@@ -73,3 +88,4 @@ export function validateBackup(x){const obj=v=>v&&typeof v==='object'&&!Array.is
  if(x.inventory.some(i=>!obj(i)||typeof i.id!=='string'||!i.id)||!unique(x.inventory.map(i=>i.id)))throw Error('備份背包資料不正確');
  if(x.goals.some(g=>!obj(g)||typeof g.id!=='string'||!g.id||!CATEGORIES[g.category]||!Array.isArray(g.chapters)||!g.chapters.length||!Array.isArray(g.quests)||!Array.isArray(g.successCriteria)||g.chapters.some(c=>!obj(c)||!Array.isArray(c.milestones)||!Number.isInteger(c.stages)||!Number.isInteger(c.stage)||c.stage<0||c.stage>c.stages))||!unique(x.goals.map(g=>g.id)))throw Error('備份目標或章節資料不正確');
  return true}
+

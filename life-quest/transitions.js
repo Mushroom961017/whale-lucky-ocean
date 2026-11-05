@@ -1,14 +1,15 @@
 // Purely visual transitions; the game state and transactions remain synchronous.
-export function createTransitions({modal, content, motion, Observer}) {
+export function createTransitions({modal, content, motion, Observer, doc=globalThis.document}) {
   let closing = false;
   let revision = 0;
+  let navigationVersion = 0, activeView = null, viewRendering = false;
   const reduced = () => Boolean(motion?.matches);
   const play = (element, frames, options) => {
     if (reduced() || typeof element?.animate !== 'function') return null;
     return element.animate(frames, options);
   };
   const enterPage = element => {
-    if (!element) return;
+    if (!element || viewRendering) return;
     element.getAnimations?.().filter(a => a.id === 'life-quest-page').forEach(a => a.cancel());
     const animation = play(element, [
       {opacity: 0, transform: 'translateY(7px)'},
@@ -27,6 +28,20 @@ export function createTransitions({modal, content, motion, Observer}) {
     if (animation) animation.id = 'life-quest-dialog';
   });
   observer.observe(content, {childList: true});
+  // Cross-fade actual rendered pages where supported; older browsers use enterPage.
+  const navigate = update => {
+    const version=++navigationVersion;
+    activeView?.skipTransition?.();
+    const apply=()=>{if(version!==navigationVersion)return;update()};
+    if(reduced()||typeof doc?.startViewTransition!=='function'){apply();return}
+    let invoked=false;
+    try{
+      const view=doc.startViewTransition(()=>{invoked=true;viewRendering=true;try{apply()}finally{viewRendering=false}});
+      activeView=view;
+      view.ready?.catch(()=>{});view.updateCallbackDone?.catch(()=>{});
+      view.finished?.then(()=>{if(activeView===view)activeView=null},()=>{if(activeView===view)activeView=null});
+    }catch{if(!invoked)apply()}
+  };
   const close = () => {
     if (!modal.open || closing) return;
     const current = revision;
@@ -42,5 +57,6 @@ export function createTransitions({modal, content, motion, Observer}) {
     };
     animation.oncancel = () => { closing = false; };
   };
-  return {enterPage, close};
+  return {enterPage, navigate, close};
 }
+

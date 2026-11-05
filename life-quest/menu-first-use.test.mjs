@@ -13,6 +13,8 @@ test('首次使用可跳過教學、建立角色並進入主選單',async()=>{
   let act=async(name)=>{let b={dataset:{action:name},disabled:false,isConnected:true};await click({target:{closest:()=>b}})};
   assert.match(node('#modal-content').innerHTML,/跳過所有教學/);await act('tutorial-skip');assert.equal(saved.tutorialSeen,true);
   assert.match(node('#modal-content').innerHTML,/冒險者名稱/);node('#character-name').value='小冒險者';await act('character');
-  assert.equal(saved.character,'小冒險者');assert.match(node('#main').innerHTML,/主選單/);assert.match(node('#main').innerHTML,/小冒險者/);
+  assert.equal(saved.character,'小冒險者');assert.equal(saved.balance,2000);assert.equal(saved.earned,2000);assert.equal(saved.transactions.filter(t=>t.type==='starter').length,1);
+  assert.match(node('#modal-content').innerHTML,/開局禮/);assert.match(node('#main').innerHTML,/主選單/);assert.match(node('#main').innerHTML,/小冒險者/);
  }finally{globalThis.setInterval=old}
 });
+

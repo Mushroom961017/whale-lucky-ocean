@@ -4,3 +4,15 @@ nav button:hover{background-color:#293c51;color:#fff0c0}
 nav button:focus-visible{outline:2px solid #f6d793;outline-offset:-3px}
 nav button.active{box-shadow:inset 0 -3px #e2bd77}
 @media(prefers-reduced-motion:reduce){nav button{transition:none}}
+/* Only the content area cross-fades; the header, controls, and saved state stay live. */
+@supports(view-transition-name: lq-main){
+ #main{view-transition-name:lq-main}
+ ::view-transition{pointer-events:none}
+ ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+ ::view-transition-old(lq-main){animation:lq-page-out 150ms ease-in both}
+ ::view-transition-new(lq-main){animation:lq-page-in 260ms cubic-bezier(.2,.75,.25,1) both}
+}
+@keyframes lq-page-out{to{opacity:0;transform:translateY(-5px)}}
+@keyframes lq-page-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){::view-transition-old(lq-main),::view-transition-new(lq-main){animation:none}}
+
