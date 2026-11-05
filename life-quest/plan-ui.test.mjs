@@ -22,6 +22,7 @@ test('貼上計畫後先預覽，確認後才入庫，重複匯入被拒絕',asy
  try{
   await import('./app.js?mobile-ui-test');await new Promise(r=>setTimeout(r,25));
   let act=async(name,data={})=>{let b={dataset:{action:name,...data},disabled:false,isConnected:true};await click({target:{closest:()=>b}})};
+  assert.match(node('#main').innerHTML,/主選單/);assert.match(node('#main').innerHTML,/測試角色/);assert.match(node('#main').innerHTML,/建立第一個目標/);
   assert.equal((node('#nav').innerHTML.match(/class="art-icon nav-art art-index-/g)||[]).length,8);
   assert.match(node('#nav').innerHTML,/data-page="adventure"/);assert.match(node('#nav').innerHTML,/冒險賞/);
   let mapNavigation={dataset:{page:'map'},disabled:false,isConnected:true};await click({target:{closest:()=>mapNavigation}});
@@ -37,6 +38,8 @@ test('貼上計畫後先預覽，確認後才入庫，重複匯入被拒絕',asy
   await act('import');node('#json').value='```json\n'+JSON.stringify(plan)+'\n```';node('#category').value='fitness';await act('import-preview');
   assert.match(node('#modal-content').innerHTML,/確認你的冒險/);assert.equal(saved.goals.length,0);
   await act('import-confirm');assert.equal(saved.goals.length,1);assert.equal(saved.goals[0].category,'fitness');assert.equal(saved.balance,0);
+  node('#modal').close();let home={dataset:{page:'menu'},disabled:false,isConnected:true};await click({target:{closest:()=>home}});
+  assert.match(node('#main').innerHTML,/繼續冒險/);assert.match(node('#main').innerHTML,/日文/);assert.equal(saved.goals.length,1);
   await act('import');node('#json').value=JSON.stringify(plan);node('#category').value='fitness';await act('import-preview');
   assert.match(node('#import-error').textContent,/已匯入/);assert.equal(saved.goals.length,1);
  }finally{globalThis.setInterval=originalSetInterval;if(oldNavigator)Object.defineProperty(globalThis,'navigator',oldNavigator);else delete globalThis.navigator}

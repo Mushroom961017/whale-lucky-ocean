@@ -6,7 +6,8 @@ class Tx { constructor(){this.aborted=false} objectStore(){return {get:()=>{let 
 globalThis.indexedDB={open:()=>{let q={result:{transaction:()=>new Tx(),createObjectStore(){}}};setTimeout(()=>q.onsuccess?.(),0);return q}};
 globalThis.setInterval=()=>1;
 globalThis.requestAnimationFrame=fn=>fn();
-globalThis.window={innerHeight:768,scrollTo(){},scrollBy(){},addEventListener(){}};
+globalThis.window={innerHeight:768,scrollTo(){},scrollBy(){},addEventListener(){},matchMedia(){return {matches:false}}};
+globalThis.MutationObserver=class{observe(){}};
 globalThis.confirm=()=>true;
 let count=0;
 async function boot(){nodes=new Map();const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',value:'',hidden:false,open:false,addEventListener(){},showModal(){this.open=true},close(){this.open=false}});return nodes.get(id)};globalThis.document={hidden:false,documentElement:{scrollHeight:768},querySelector:node,querySelectorAll:()=>[],addEventListener:(type,fn)=>{if(type==='click')click=fn}};await import('../app.js?test='+count++);await delay(25);return node}
@@ -18,3 +19,4 @@ get('#character-name').value='測試';await action('character');assert.equal(sav
 await action('tutorial-replay');for(let i=0;i<7;i++){assert.match(get('#modal-content').innerHTML,/跳過所有教學/);await action('tutorial-next')}assert.match(get('#modal-content').innerHTML,/追蹤成果並備份/);await action('tutorial-next');assert.equal(get('#modal').open,false);assert.equal(saved.character,'測試');
 await action('prize-detail',{tier:'D',index:'0'});assert.match(get('#modal-content').innerHTML,/1 \/ 2/);await action('prize-detail',{tier:'D',index:'1'});assert.match(get('#modal-content').innerHTML,/2 \/ 2/);assert.match(get('#modal-content').innerHTML,/旋風劍舞/);
 console.log('PASS: tutorial skip, persistence, replay, completion, and prize pagination');
+
