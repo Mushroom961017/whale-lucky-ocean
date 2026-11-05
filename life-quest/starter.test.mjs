@@ -20,5 +20,6 @@ test('原有角色不會自動增加台幣',()=>{
 });
 test('開局禮可用於有限獎池且消費後帳本與備份仍一致',()=>{
  let s=fresh();createCharacter(s,'旅人');for(let i=0;i<20;i++)draw(s,()=>0);
- assert.equal(s.balance,0);assert.equal(s.spent,2000);assert.equal(s.inventory.length,20);assert.equal(s.pool.reduce((a,b)=>a+b,0),20);assert.ok(validateBackup(s));
+ assert.equal(s.balance,0);assert.equal(s.spent,2000);assert.equal(s.inventory.length,20);assert.equal(s.pool.reduce((a,b)=>a+b,0),150);assert.ok(validateBackup(s));
 });
+

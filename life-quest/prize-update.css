@@ -1,0 +1,12 @@
+.prize-art{background-size:cover;background-position:center;image-rendering:pixelated}
+.prize-art-0{background-image:url('tier-A.webp');background-position:center}
+.prize-art-1{background-image:url('tier-B.webp');background-position:center}
+.prize-art-2{background-image:url('tier-C.webp');background-position:center}
+.prize-art-3{background-image:url('tier-D.webp');background-position:center}
+.prize-art-4{background-image:url('tier-E.webp');background-position:center}
+.catalog-art{display:inline-block;flex:none;vertical-align:middle;background-repeat:no-repeat;background-position:var(--px) var(--py);image-rendering:pixelated}
+.catalog-junk{background-image:url('prize-junk.webp');background-size:400% 500%}
+.catalog-premium{background-image:url('prize-premium.webp');background-size:500% 200%}
+.prize-flavor{color:#ffe5ac;font-size:.95rem;line-height:1.5;max-width:28em;margin:.5rem auto}
+.last-reveal{border:1px solid #d2a64e;border-radius:8px;padding:.4rem;margin:.5rem auto;background:#392c1d}
+.last-reveal .last-art{width:2rem;height:2rem;vertical-align:middle}
