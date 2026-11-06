@@ -1,0 +1,20 @@
+/* Compact pixel-inspired controls; preserve comfortable touch targets. */
+:root{--compact-gold:#d9b77b;--compact-border:#8f846d;--compact-shadow:#101929}
+button,.plan-link{border-radius:2px;transition:background-color .14s,border-color .14s,transform .14s;box-shadow:2px 2px 0 var(--compact-shadow)}
+button:hover:not(:disabled),.plan-link:hover{border-color:#e8ca8e;background-color:#354a5d}
+button:active:not(:disabled){transform:translate(1px,1px);box-shadow:1px 1px 0 var(--compact-shadow)}
+button:focus-visible,.plan-link:focus-visible{outline:2px solid #ffe3a8;outline-offset:2px}
+.menu-shortcuts{gap:4px}.menu-shortcut{min-height:54px;padding:5px 8px;gap:7px;background:linear-gradient(180deg,#2a3c50,#1c2b3e);border-color:#918671;box-shadow:inset 0 1px #f4d5981a,2px 2px #0d1825}
+.menu-shortcut small{margin-top:1px}.main-menu{gap:6px}.menu-summary{gap:3px}.menu-scene{box-shadow:inset 0 0 0 2px #342f2baa,3px 3px #101724}
+.settings-grid,.grid,.layout{gap:7px}.settings-row{padding:.55rem 0}.settings-actions,.plan-start-actions,.plan-tools,.plan-actions{gap:4px}.settings-actions{margin-top:.55rem}.plan-start-actions{margin-top:10px}.plan-tools{margin-bottom:9px}
+.bag-filters,.detail-controls,.region-controls,.today-footer,.bag-bottom{gap:4px}
+nav{gap:2px}nav button{box-shadow:none}nav button.active{border-color:#d2b179;background:linear-gradient(#31465a,#24384b)}
+.panel,.card,.character-stage,.character-stats,.character-bag,.draw-tier{box-shadow:inset 0 0 0 1px #e0c28a20,2px 2px 0 #080f1d}
+@media(max-width:600px){
+ main{padding-left:9px;padding-right:9px}.main-menu{gap:5px}.menu-shortcuts{gap:4px}.menu-shortcut{min-height:52px;padding:4px 6px;gap:5px}.menu-shortcut .nav-art{width:25px;height:25px}.menu-shortcut b{font-size:12px}.menu-shortcut small{font-size:10px}.menu-shortcut .menu-arrow{font-size:18px}
+ .grid,.layout,.settings-grid{gap:6px}.panel,.card{padding:11px}.plan-start{padding:13px}.plan-start-actions,.plan-actions{gap:4px}.plan-tools{gap:4px}.settings-row{padding:.48rem 0}.settings-actions{gap:4px}
+ .draw-tiers{gap:5px}.draw-summary{gap:5px}.draw-footer{gap:5px}.bag-filters,.detail-controls,.region-controls,.today-footer,.bag-bottom{gap:4px}
+ nav{gap:1px;padding:3px 4px calc(3px + env(safe-area-inset-bottom))}nav button{min-height:50px;gap:1px}nav .nav-art{width:24px;height:24px}main{padding-bottom:calc(130px + env(safe-area-inset-bottom))}
+}
+@media(max-width:360px){.menu-shortcut{padding:4px;gap:4px}.menu-shortcut .nav-art{width:22px;height:22px}.menu-shortcut b{font-size:11px}}
+@media(prefers-reduced-motion:reduce){button,.plan-link{transition:none}}
