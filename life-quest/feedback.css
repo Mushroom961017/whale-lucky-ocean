@@ -1,0 +1,36 @@
+/* Eterra feedback: one short cue for each confirmed action. */
+.gear-result{--gear-glint:#c9eadb;margin:8px 0;padding:8px 10px;border:1px solid #6e9d8e;border-left:3px solid var(--gear-glint);background:#183735;color:#e3faec;animation:eterra-feedback-in 200ms ease-out both}
+.gear-result[data-effect="enhance"]{--gear-glint:#f3cd81;border-color:#ad8b52;border-left-color:var(--gear-glint);background:#39301e;color:#fff0c8}
+.gear-result b{display:block}.gear-result b span{display:inline-block;color:var(--gear-glint);animation:eterra-feedback-seal 300ms ease-out both}
+.gear-result ul{display:flex;flex-wrap:wrap;gap:4px 10px;margin:4px 0 0;padding:0;list-style:none;font-size:12px;font-variant-numeric:tabular-nums}
+.gear-celebrate .detail-large-art{animation:eterra-forge 340ms cubic-bezier(.18,.8,.3,1) both}
+.gear-celebrate[data-effect="enhance"] .detail-large-art{--forge-glow:#efc46f88}
+
+.map-location:active:not(:disabled){transform:translate(-50%,-50%);box-shadow:none}
+.map-location[data-active="true"] .map-marker{outline:2px solid #b8ebd4;outline-offset:1px;box-shadow:0 0 10px #8dd9b76b}
+.map-location[data-active="true"] .map-label{border-color:#a5d3b9;color:#eaffef}
+.region-arrival .region-title .region-art{animation:eterra-waypoint 310ms cubic-bezier(.18,.8,.3,1) both}
+.route-current{display:inline-block;margin-left:3px;padding:1px 5px;border:1px solid #78a98f;background:#1f3b36;color:#d1f2db;font-size:11px;vertical-align:middle}
+.battle-cue[data-tone="route"]{background:#182f38f2;border-color:#91cbb1;color:#e0f8e9;text-overflow:ellipsis;overflow:hidden}
+
+.progress-celebration{--seal-edge:#94bea5;--seal-bg:#26443d;--seal-fill:#bde6bf;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 11px;align-items:center;overflow-wrap:anywhere;padding:6px 2px}
+.progress-complete{--seal-edge:#dbb977;--seal-bg:#4f3e24;--seal-fill:#f8dfa0}
+.progress-medal{display:grid;place-items:center;width:45px;height:45px;border:2px solid var(--seal-edge);background:var(--seal-bg);color:var(--seal-fill);box-shadow:inset 0 0 0 2px #0e172682,2px 2px #0f1a28;font-size:22px;text-shadow:1px 2px #121e28;animation:eterra-feedback-seal 340ms cubic-bezier(.18,.8,.3,1) both}
+.progress-copy h2,.progress-copy p{margin:0}.progress-copy p{font-size:13px}
+.progress-meter,.progress-change,.progress-rewards,.progress-celebration>[data-close]{grid-column:1/-1}
+.progress-meter{height:10px;overflow:hidden;background:#0c1725;border:1px solid var(--seal-edge);margin-top:3px}
+.progress-meter span{display:block;height:100%;background:linear-gradient(90deg,var(--seal-edge),var(--seal-fill));transform:scaleX(var(--to));transform-origin:left;animation:eterra-goal-fill 420ms cubic-bezier(.16,.65,.26,1) both}
+.progress-change{margin:0;color:#d2e4e5;font-variant-numeric:tabular-nums}.progress-change b{color:var(--seal-fill)}
+.progress-rewards{display:flex;gap:6px;flex-wrap:wrap}.progress-rewards span{padding:3px 8px;border:1px solid #8e7954;background:#3b3328;color:#ffe3a0;font-size:12px;font-weight:bold}
+.progress-celebration>[data-close]{justify-self:start;min-height:44px}
+
+@keyframes eterra-feedback-in{from{opacity:.6;translate:0 4px}to{opacity:1;translate:0 0}}
+@keyframes eterra-feedback-seal{from{opacity:.55;transform:scale(1.16) rotate(-7deg)}65%{opacity:1;transform:scale(.98) rotate(1deg)}to{transform:none}}
+@keyframes eterra-forge{0%,100%{transform:scale(1)}42%{transform:scale(1.055);filter:drop-shadow(0 0 8px var(--forge-glow,#9ad5bd77))}}
+@keyframes eterra-waypoint{from{transform:scale(.8);opacity:.65}70%{transform:scale(1.07);opacity:1}to{transform:none}}
+@keyframes eterra-goal-fill{from{transform:scaleX(var(--from))}to{transform:scaleX(var(--to))}}
+.settings-reduced-motion :is(.gear-result,.gear-result b span,.gear-celebrate .detail-large-art,.region-arrival .region-title .region-art,.progress-medal,.progress-meter span){animation:none!important}
+@media(prefers-reduced-motion:reduce){
+ :is(.gear-result,.gear-result b span,.gear-celebrate .detail-large-art,.region-arrival .region-title .region-art,.progress-medal,.progress-meter span){animation:none!important}
+ #reward-feedback{transition:none}
+}
