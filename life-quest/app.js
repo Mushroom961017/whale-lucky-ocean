@@ -1,14 +1,17 @@
 import {prizeFlavor,prizeArtInfo} from './prize-catalog.js?v=20261105';
 import {CATEGORIES,THEMES,PRIZES,VARIANTS,PRICE,ENHANCE_COST,STARTER_NT,createCharacter,fresh,normalize,reward,claimQuest,questAvailable,addQuest,addChapter,addMilestone,validateBackup,draw,remainingTickets,poolDefinition,poolVariants,nextRound,enhance,stats,level,today,questKey,currentChapter,goalProgress,startBattle,combatTick,uuid} from './engine.js?v=prizes20261105';
-import {createTransitions} from './transitions.js?v=starter20261105';
+import {createTransitions} from './transitions.js?v=motion20261111';
 import {parsePlanText,ensureUniqueGoal} from './plan-import.js?v=20261104';
 const $=s=>document.querySelector(s), esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=fresh(),page='menu',db,busy=false;
 const modal=$('#modal'),modalBody=$('#modal-content');
-const transitions=createTransitions({modal,content:modalBody,motion:{get matches(){return !!state.settings?.reduceMotion||window.matchMedia('(prefers-reduced-motion: reduce)').matches}},Observer:MutationObserver});
+const motionReduced=()=>!!state.settings?.reduceMotion||window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const transitions=createTransitions({modal,content:modalBody,motion:{get matches(){return motionReduced()}},Observer:MutationObserver});
 const categories=()=>Object.entries(CATEGORIES).map(([id,c])=>`<option value="${id}">${c[0]}</option>`).join('');
 function open(html){modalBody.innerHTML=html;modal.showModal();requestAnimationFrame(syncModalTurner)}
 function notice(msg){open(`<h2>✦ 提示</h2><p>${esc(msg)}</p><button data-close>關閉</button>`)}
+function missionNotice(title,message){open(`<div class="mission-dispatch"><div class="mission-dispatch-head"><span class="mission-seal" aria-hidden="true">✦</span><h2>${esc(title)}</h2></div><p>${esc(message)}</p><button data-close>關閉</button></div>`)}
+function cueQuest(id,goal,action){if(motionReduced())return;const button=[...($('#main').querySelectorAll?.(`button[data-action="${action}"]`)||[])].find(el=>el.dataset.id===id&&el.dataset.goal===goal);button?.closest('.card, .today-quest')?.classList.add('quest-settled')}
 let tutorialStep=0,tutorialActive=false;
 const TUTORIAL=[
  {page:'adventure',icon:'✦',title:'歡迎來到人生冒險',body:'在艾特拉大陸，每一段冒險都對應你的真實人生目標。完成現實任務可獲得 EXP 和遊戲台幣，讓角色準備迎接挑戰。',tip:'這段教學可以隨時跳過，之後可在「日誌」重新查看。'},
@@ -31,7 +34,7 @@ function getGoal(){return state.goals.find(g=>g.id===state.activeGoal)||state.go
 function header(){let g=getGoal();$('#status').innerHTML=`<span>♟ ${esc(state.character||'冒險者')} · Lv.${level(state)}</span><span>✦ ${state.exp} EXP</span><span>◈ NT$ ${state.balance}</span><span>${g?esc(g.title):'尚未選擇目標'}</span>`}
 const navs=[['adventure','⚔','冒險'],['tasks','☑','任務'],['map','◈','地圖'],['character','♟','角色'],['draw','✦','冒險賞'],['inventory','▣','背包'],['achievements','🏅','成就'],['journal','☰','日誌']];
 let renderedPage=null;
-function render(){document.documentElement.classList?.toggle('settings-large-text',!!state.settings?.largeText);document.documentElement.classList?.toggle('settings-reduced-motion',!!state.settings?.reduceMotion);header();$('#nav').innerHTML=navs.map(([id,icon,label],index)=>`<button data-page="${id}" class="${page===id?'active':''}" ${page===id?'aria-current="page"':''}><span class="art-icon nav-art art-index-${index}" aria-hidden="true"></span><span>${label}</span></button>`).join('');const main=$('#main'),changed=renderedPage!==null&&renderedPage!==page;main.innerHTML=({menu:mainMenu,adventure,tasks,map,character,drawPage,inventory,achievements,journal,settings}[page==='draw'?'drawPage':page]||mainMenu)();if(changed)transitions.enterPage(main);renderedPage=page;requestAnimationFrame(syncPageTurner)}
+function render(){document.documentElement.classList?.toggle('settings-large-text',!!state.settings?.largeText);document.documentElement.classList?.toggle('settings-reduced-motion',!!state.settings?.reduceMotion);header();$('#nav').innerHTML=navs.map(([id,icon,label],index)=>`<button data-page="${id}" class="${page===id?'active':''}" ${page===id?'aria-current="page"':''}><span class="art-icon nav-art art-index-${index}" aria-hidden="true"></span><span>${label}</span></button>`).join('');const main=$('#main'),changed=renderedPage!==null&&renderedPage!==page;main.innerHTML=({menu:mainMenu,adventure,tasks,map,character,drawPage,inventory,achievements,journal,settings}[page==='draw'?'drawPage':page]||mainMenu)();if(changed)transitions.enterPage(main);if(page==='adventure'&&renderedPage!==page&&getGoal())preloadCombatFrames();renderedPage=page;requestAnimationFrame(syncPageTurner)}
 function navigateTo(destination){transitions.navigate(()=>{page=destination;render();window.scrollTo(0,0)})}
 function syncModalTurner(){let el=document.querySelector('#modal-turner');if(el)el.hidden=!modal.open||modal.scrollHeight<=modal.clientHeight+2}
 function syncPageTurner(){let el=document.querySelector('#page-turner');if(el)el.hidden=document.documentElement.scrollHeight<=window.innerHeight+5}
@@ -102,14 +105,22 @@ function newQuestDialog(id){const g=state.goals.find(x=>x.id===id);open(`<h2>新
 function newChapterDialog(id){let g=state.goals.find(x=>x.id===id);open(`<h2>新增目標章節</h2><p>每個章節包含一般關卡、現實里程碑及獨立的 Boss。</p><label for="nc-title">章節名稱</label><input id="nc-title" maxlength="100"><label for="nc-stages">一般戰鬥關卡數</label><input id="nc-stages" type="number" min="1" max="20" value="2"><label for="nc-boss">Boss 名稱</label><input id="nc-boss" value="${esc(CATEGORIES[g.category][1])}" maxlength="100"><label for="nc-milestone">現實里程碑名稱</label><input id="nc-milestone" maxlength="100"><label for="nc-criteria">現實驗收條件</label><input id="nc-criteria" maxlength="500"><p><button class="primary" data-action="new-chapter-save" data-goal="${esc(id)}">新增章節</button> <button data-action="expand-plan" data-goal="${esc(id)}">返回</button></p>`)}
 function newMilestoneDialog(id){let g=state.goals.find(x=>x.id===id),chapters=g.chapters.filter(c=>!c.bossDefeated);if(!chapters.length)throw Error('目前沒有可追加里程碑的章節，請先新增章節');open(`<h2>新增現實里程碑</h2><label for="nm-chapter">選擇章節</label><select id="nm-chapter">${chapters.map(c=>`<option value="${esc(c.id)}">${esc(c.title)}</option>`).join('')}</select><label for="nm-title">里程碑名稱</label><input id="nm-title" maxlength="100"><label for="nm-criteria">現實驗收條件</label><input id="nm-criteria" maxlength="500"><p><button class="primary" data-action="new-milestone-save" data-goal="${esc(id)}">新增里程碑</button> <button data-action="expand-plan" data-goal="${esc(id)}">返回</button></p>`)}
 function manualGoalDialog(){open(`<h2>手動建立人生目標</h2><label>目標名稱</label><input id="manual-title"><label>分類</label><select id="manual-cat">${categories()}</select><label>開始日期</label><input id="manual-start" type="date" value="${today()}"><label>截止日期</label><input id="manual-end" type="date"><label>每日任務</label><input id="manual-task"><label>任務難度</label><select id="manual-difficulty"><option value="easy">簡單</option><option value="normal">普通</option><option value="hard">困難</option></select><label>第一個現實里程碑與驗收條件</label><input id="manual-milestone"><label>目標最終達成條件</label><input id="manual-criteria"><button class="primary" data-action="manual-save">建立目標</button> <button data-close>取消</button>`)}
-let pendingReveal=null;
-function revealPrize(){if(!pendingReveal||!modal.open)return;let item=pendingReveal;pendingReveal=null;modalBody.innerHTML=`<div class="prize-reveal rarity-${esc(item.tier)}" role="status"><div class="reveal-rays"></div><div class="prize-sparkles">✦　✧　✦</div><div class="prize-icon">${itemArt(item.name,"reveal-item-art")}</div><div class="prize-label">${esc(item.tier)} 賞</div><h1>${esc(item.name)}</h1><p class="prize-flavor">「${esc(prizeFlavor(item))}」</p>${item.lastOne?`<div class="last-reveal">最後賞 ${itemArt(item.lastOne.name,"last-art")} <b>${esc(item.lastOne.name)}</b><p class="prize-flavor">「${esc(prizeFlavor(item.lastOne))}」</p></div>`:""}<p>獎品已放入背包</p></div><button class="primary reward-accept" data-close>收下獎勵</button>`}
+let pendingReveal=null,revealTimer;
+const DRAW_REVEAL_MS=1050;
+function startDrawReveal(item){
+ pendingReveal=item;
+ open('<div class="draw-sequence" aria-live="polite"><div class="draw-stars" aria-hidden="true">✦　✧　✦</div><div class="draw-ring" aria-hidden="true"></div><div class="draw-ticket"><span>ADVENTURE</span><b>冒險賞</b><small>命運之籤</small></div><h2>命運之籤，揭曉中</h2><p>獎勵已安全存入背包</p></div><button class="skip-animation" data-action="reveal">跳過動畫 ›</button>');
+ clearTimeout(revealTimer);
+ if(motionReduced())revealPrize();else revealTimer=setTimeout(()=>{if(pendingReveal===item)revealPrize()},DRAW_REVEAL_MS);
+}
+modal.addEventListener('close',()=>{if(!modal.open){clearTimeout(revealTimer);pendingReveal=null}});
+function revealPrize(){if(!pendingReveal||!modal.open)return;clearTimeout(revealTimer);let item=pendingReveal;pendingReveal=null;modalBody.innerHTML=`<div class="prize-reveal rarity-${esc(item.tier)}" role="status"><div class="reveal-rays"></div><div class="prize-sparkles">✦　✧　✦</div><div class="prize-icon">${itemArt(item.name,"reveal-item-art")}</div><div class="prize-label">${esc(item.tier)} 賞</div><h1>${esc(item.name)}</h1><p class="prize-flavor">「${esc(prizeFlavor(item))}」</p>${item.lastOne?`<div class="last-reveal">最後賞 ${itemArt(item.lastOne.name,"last-art")} <b>${esc(item.lastOne.name)}</b><p class="prize-flavor">「${esc(prizeFlavor(item.lastOne))}」</p></div>`:""}<p>獎品已放入背包</p></div><button class="primary reward-accept" data-close>收下獎勵</button>`}
 document.addEventListener('click',async e=>{let el=e.target.closest('button');if(!el)return;if(el.dataset.close!==undefined){transitions.close();return}if(el.dataset.page){navigateTo(el.dataset.page);return}let a=el.dataset.action;if(!a||busy)return;busy=true;el.disabled=true;try{
  if(a==='setting-toggle'){let key=el.dataset.key;if(!['reduceMotion','largeText'].includes(key))throw Error('設定不存在');await mutate(s=>{s.settings||={};s.settings[key]=!s.settings[key]})}
  if(a==='character-reset-dialog'){if(!['delete','rebuild'].includes(el.dataset.mode))throw Error('操作無效');resetDialog(el.dataset.mode)}
  if(a==='character-reset-confirm'){let mode=el.dataset.mode;if(!['delete','rebuild'].includes(mode)||$('#reset-confirm-text').value.trim()!==(mode==='rebuild'?'重建角色':'刪除角色'))throw Error('請輸入指定文字以確認');await mutate(s=>{let settings=s.settings;for(const key of Object.keys(s))delete s[key];Object.assign(s,fresh(),{tutorialSeen:true,settings})});modal.close();page='menu';render();characterModal()}
  if(a==='today-page'){todayPage=Math.max(0,Number(el.dataset.index)||0);render()}
- if(a==='quick-quest'){let r=await mutate(s=>claimQuest(s,el.dataset.goal,el.dataset.id));rewardToast('任務完成！獲得 '+r.exp+' EXP 與 NT$'+r.nt)}
+ if(a==='quick-quest'){let r=await mutate(s=>claimQuest(s,el.dataset.goal,el.dataset.id));cueQuest(el.dataset.id,el.dataset.goal,'quick-quest');rewardToast('任務完成！獲得 '+r.exp+' EXP 與 NT$'+r.nt)}
  if(a==='character-filter'){characterFilter=el.dataset.filter;characterPage=0;render()}
  if(a==='character-page'){characterPage=Math.max(0,Number(el.dataset.index)||0);render()}
  if(a==='gear-slot'){let id=state.equipped[el.dataset.slot];if(id)showCharacterItem(id);else {characterFilter=el.dataset.slot;characterPage=0;render()}}
@@ -134,14 +145,14 @@ document.addEventListener('click',async e=>{let el=e.target.closest('button');if
  if(a==='character'){let name=$('#character-name').value.trim();let gift=await mutate(s=>createCharacter(s,name));modal.close();if(gift.granted)notice('歡迎來到艾特拉大陸！已獲得開局禮：NT$'+gift.granted+' 遊戲台幣。')}
  if(a==='prompt')promptDialog();
  if(a==='manual-goal')manualGoalDialog();
- if(a==='manual-save'){let title=$('#manual-title').value.trim(),cat=$('#manual-cat').value,start=$('#manual-start').value,end=$('#manual-end').value,task=$('#manual-task').value.trim(),milestone=$('#manual-milestone').value.trim(),criteria=$('#manual-criteria').value.trim();if(!title||!start||!end||end<start||!task||!milestone||!criteria)throw Error('請完整填寫目標，並確認日期順序');let g=normalize({goalId:uuid(),goalTitle:title,goalCategory:cat,startDate:start,deadline:end,chapters:[{id:uuid(),title:THEMES[cat][0],stages:2,milestones:[{id:uuid(),title:milestone,criteria:milestone}]}],dailyQuests:[{id:uuid(),title:task,difficulty:$('#manual-difficulty').value,recurring:true}],successCriteria:[criteria]});await mutate(s=>{s.goals.push(g);s.activeGoal=g.id});modal.close();notice('目標已建立。')}
+ if(a==='manual-save'){let title=$('#manual-title').value.trim(),cat=$('#manual-cat').value,start=$('#manual-start').value,end=$('#manual-end').value,task=$('#manual-task').value.trim(),milestone=$('#manual-milestone').value.trim(),criteria=$('#manual-criteria').value.trim();if(!title||!start||!end||end<start||!task||!milestone||!criteria)throw Error('請完整填寫目標，並確認日期順序');let g=normalize({goalId:uuid(),goalTitle:title,goalCategory:cat,startDate:start,deadline:end,chapters:[{id:uuid(),title:THEMES[cat][0],stages:2,milestones:[{id:uuid(),title:milestone,criteria:milestone}]}],dailyQuests:[{id:uuid(),title:task,difficulty:$('#manual-difficulty').value,recurring:true}],successCriteria:[criteria]});await mutate(s=>{s.goals.push(g);s.activeGoal=g.id});modal.close();missionNotice('任務發布','目標已建立。')}
  if(a==='expand-plan')expandPlanDialog(el.dataset.goal);
  if(a==='new-quest')newQuestDialog(el.dataset.goal);
  if(a==='new-chapter')newChapterDialog(el.dataset.goal);
  if(a==='new-milestone')newMilestoneDialog(el.dataset.goal);
- if(a==='new-quest-save'){let input={title:$('#nq-title').value,difficulty:$('#nq-difficulty').value,recurring:$('#nq-repeat').value==='daily',date:$('#nq-date').value};await mutate(s=>addQuest(s,el.dataset.goal,input));modal.close();notice('任務已加入；可在重新安排計畫中調整執行星期。')}
- if(a==='new-chapter-save'){let input={title:$('#nc-title').value,stages:$('#nc-stages').value,bossName:$('#nc-boss').value,milestone:$('#nc-milestone').value,criteria:$('#nc-criteria').value};await mutate(s=>addChapter(s,el.dataset.goal,input));modal.close();notice('章節與里程碑已加入。')}
- if(a==='new-milestone-save'){let input={title:$('#nm-title').value,criteria:$('#nm-criteria').value},chapter=$('#nm-chapter').value;await mutate(s=>addMilestone(s,el.dataset.goal,chapter,input));modal.close();notice('里程碑已加入。')}
+ if(a==='new-quest-save'){let input={title:$('#nq-title').value,difficulty:$('#nq-difficulty').value,recurring:$('#nq-repeat').value==='daily',date:$('#nq-date').value};await mutate(s=>addQuest(s,el.dataset.goal,input));modal.close();missionNotice('任務發布','任務已加入；可在重新安排計畫中調整執行星期。')}
+ if(a==='new-chapter-save'){let input={title:$('#nc-title').value,stages:$('#nc-stages').value,bossName:$('#nc-boss').value,milestone:$('#nc-milestone').value,criteria:$('#nc-criteria').value};await mutate(s=>addChapter(s,el.dataset.goal,input));modal.close();missionNotice('章節開啟','章節與里程碑已加入。')}
+ if(a==='new-milestone-save'){let input={title:$('#nm-title').value,criteria:$('#nm-criteria').value},chapter=$('#nm-chapter').value;await mutate(s=>addMilestone(s,el.dataset.goal,chapter,input));modal.close();missionNotice('新里程碑','里程碑已加入。')}
  if(a==='edit-plan')editPlanDialog();
  if(a==='edit-open')editGoalDialog($('#edit-goal').value);
  if(a==='edit-save'){let id=el.dataset.goal,g=state.goals.find(x=>x.id===id),title=$('#edit-title').value.trim(),end=$('#edit-deadline').value;if(!title||!end||end<g.startDate)throw Error('請填寫正確目標名稱與期限');let changes=g.quests.map((q,i)=>({id:q.id,title:$('#qname-'+i).value.trim(),date:q.recurring?null:$('#qdate-'+i).value,weekdays:q.recurring?[...document.querySelectorAll('.weekday[data-q="'+i+'"]:checked')].map(x=>Number(x.value)):null}));if(changes.some(x=>!x.title))throw Error('任務名稱不可為空');await mutate(s=>{let target=s.goals.find(x=>x.id===id);target.title=title;target.deadline=end;for(const change of changes){let q=target.quests.find(x=>x.id===change.id);if(q){q.title=change.title;if(q.recurring)q.weekdays=change.weekdays;else q.date=change.date}}});modal.close();notice('計畫已更新，原有獎勵與進度均已保留。')}
@@ -151,13 +162,13 @@ document.addEventListener('click',async e=>{let el=e.target.closest('button');if
  if(a==='demo')importDialog(JSON.stringify(sample,null,2));
  if(a==='import-preview')importPreview();
  if(a==='import-back'){if(!planImportDraft)throw Error('請重新貼上計畫');importDialog(planImportDraft.text,planImportDraft.category)}
- if(a==='import-confirm'){if(!planImportDraft)throw Error('請先檢查並預覽計畫');let raw=parsePlanText(planImportDraft.text),g=normalize(raw,planImportDraft.category);await mutate(s=>{ensureUniqueGoal(s,g);s.goals.push(g);s.activeGoal=g.id});planImportDraft=null;modal.close();notice('目標已建立，請先完成現實任務或里程碑。')}
- if(a==='quest'){let g=state.goals.find(x=>x.id===el.dataset.goal),q=g.quests.find(x=>x.id===el.dataset.id);if(!confirm('確認已在現實中完成「'+q.title+'」？'))return;let r=await mutate(s=>claimQuest(s,g.id,q.id));notice('任務完成！獲得 '+r.exp+' EXP 與 NT$'+r.nt)}
+ if(a==='import-confirm'){if(!planImportDraft)throw Error('請先檢查並預覽計畫');let raw=parsePlanText(planImportDraft.text),g=normalize(raw,planImportDraft.category);await mutate(s=>{ensureUniqueGoal(s,g);s.goals.push(g);s.activeGoal=g.id});planImportDraft=null;modal.close();missionNotice('任務發布','目標已建立，請先完成現實任務或里程碑。')}
+ if(a==='quest'){let g=state.goals.find(x=>x.id===el.dataset.goal),q=g.quests.find(x=>x.id===el.dataset.id);if(!confirm('確認已在現實中完成「'+q.title+'」？'))return;let r=await mutate(s=>claimQuest(s,g.id,q.id));cueQuest(q.id,g.id,'quest');rewardToast('任務完成！獲得 '+r.exp+' EXP 與 NT$'+r.nt)}
  if(a==='milestone'){let id=el.dataset.id,gid=el.dataset.goal;if(!confirm('確認已達成此里程碑的現實驗收條件？'))return;await mutate(s=>{let g=s.goals.find(x=>x.id===gid),m=g.chapters.flatMap(c=>c.milestones).find(x=>x.id===id);if(m.done)throw Error('此里程碑已驗收');reward(s,g.id,'milestone:'+m.id,'milestone');m.done=true});notice('里程碑已驗收！獲得 80 EXP 與 NT$120。')}
  if(a==='outcome'){let gid=el.dataset.goal,g=state.goals.find(x=>x.id===gid);if(g.chapters.some(c=>c.milestones.some(m=>!m.done)))throw Error('請先完成全部現實里程碑');if(!confirm('確認已在現實中完成全部目標達成條件？'))return;await mutate(s=>{let g=s.goals.find(x=>x.id===gid);if(g.outcome||g.chapters.some(c=>c.milestones.some(m=>!m.done)))throw Error('目標尚未符合驗收條件或已驗收');reward(s,g.id,'outcome','outcome');g.outcome=true;g.completedAt=new Date().toISOString()});notice('恭喜完成現實目標！')}
  if(a==='select'){await mutate(s=>{if(s.battle&&!s.battle.result&&s.battle.goalId!==el.dataset.goal)throw Error('請等目前戰鬥結束後再切換目標');s.activeGoal=el.dataset.goal});navigateTo('adventure')}
- if(a==='battle'){await mutate(s=>{if(s.battle&&!s.battle.result)throw Error('戰鬥正在進行');startBattle(s,s.goals.find(x=>x.id===s.activeGoal)||s.goals[0])})}
- if(a==='draw'){let item=await mutate(s=>draw(s));pendingReveal=item;open('<div class="draw-sequence" aria-live="polite"><div class="draw-stars">✦　✧　✦　✧　✦</div><div class="draw-ring"></div><div class="draw-ticket"><span>ADVENTURE</span><b>冒險賞</b><small>命運之籤</small></div><h2>命運之籤，揭曉中</h2><p>獎勵已安全存入背包</p></div><button class="skip-animation" data-action="reveal">跳過動畫 ›</button>');setTimeout(revealPrize,2400)}
+ if(a==='battle'){await mutate(s=>{if(s.battle&&!s.battle.result)throw Error('戰鬥正在進行');startBattle(s,s.goals.find(x=>x.id===s.activeGoal)||s.goals[0])});if(page==='adventure'){preloadCombatFrames();sceneCue(state.battle?.boss?'首領戰':'挑戰開始')}}
+ if(a==='draw'){const item=await mutate(s=>draw(s));startDrawReveal(item)}
  if(a==='reveal')revealPrize();
  if(a==='round'){await mutate(s=>nextRound(s));notice('新一輪固定獎池已開啟。')}
  if(a==='enhance'){await mutate(s=>enhance(s,el.dataset.id));notice('裝備已強化。')}
@@ -168,9 +179,45 @@ document.addEventListener('click',async e=>{let el=e.target.closest('button');if
  if(a==='restore'){open('<h2>匯入備份</h2><p>這會以備份取代目前的本機存檔，請先匯出現有資料。</p><input id="backup-file" type="file" accept="application/json"><button class="danger" data-action="restore-confirm">確認取代</button> <button data-close>取消</button>')}
  if(a==='restore-confirm'){let f=$('#backup-file').files[0];if(!f)throw Error('請選擇備份檔');let x=JSON.parse(await f.text());validateBackup(x);if(!confirm('確定以備份取代目前存檔？'))return;await mutate(s=>{for(const k of Object.keys(s))delete s[k];Object.assign(s,x)});modal.close();notice('備份已還原。')}
  }catch(err){notice(err.message||'操作失敗')}finally{busy=false;if(el.isConnected)el.disabled=false;requestAnimationFrame(syncModalTurner)}});
-// The battle simulation commits once per second; these frames only visualize that resolved exchange.
-function animateCombatExchange(b){const hero=document.querySelector('.scene .sprite:not(.monster) img'),enemy=document.querySelector('.scene .sprite.monster img');if(!hero||!enemy)return;const enemyType=b.boss?'boss':'monster';hero.src='hero-attack.webp';enemy.src=enemyType+'-hurt.webp';setTimeout(()=>{if(!hero.isConnected||!enemy.isConnected)return;if(b.enemyHp>0){hero.src='hero-hurt.webp';enemy.src=enemyType+'-attack.webp'}},300);setTimeout(()=>{if(!hero.isConnected||!enemy.isConnected)return;hero.src='hero-hd.webp';enemy.src=enemyType+'-hd.webp'},700)}
-setInterval(async()=>{if(document.hidden||busy||!state.battle||state.battle.result==='lose')return;if(state.battle.result==='win'){let g=state.goals.find(x=>x.id===state.battle.goalId),c=g&&currentChapter(g);if(!c||c.bossDefeated||(c.stage>=c.stages&&c.milestones.some(m=>!m.done)))return}busy=true;try{let previousTurn=state.battle.turn,previousGoal=state.battle.goalId;await mutate(s=>{if(!s.battle)return;if(!s.battle.result){combatTick(s);return}if(s.battle.result==='win'){let g=s.goals.find(x=>x.id===s.battle.goalId),c=g&&currentChapter(g);if(g&&c&&!c.bossDefeated&&(c.stage<c.stages||c.milestones.every(m=>m.done)))startBattle(s,g)}},page==='adventure'&&!modal.open);if(page==='adventure'&&!modal.open&&state.battle?.goalId===previousGoal&&state.battle.turn===previousTurn+1)animateCombatExchange(state.battle)}catch(e){console.error(e)}finally{busy=false}},1000);
+// Animation runs after the committed turn and never writes combat state.
+const combatFrames=new Map();
+function preloadCombatFrames(){
+ if(typeof Image!=='function'||motionReduced())return;
+ for(const actor of ['hero',state.battle?.boss?'boss':'monster'])for(const frame of ['hd','attack','hurt']){
+  const key=`${actor}-${frame}`;if(combatFrames.has(key))continue;const image=new Image();image.src=`${key}.webp`;combatFrames.set(key,image);
+ }
+}
+function setCombatFrame(img,actor,frame){
+ const source=combatFrames.get(`${actor}-${frame}`);
+ if(source?.complete&&source.naturalWidth)img.src=source.src;
+}
+function sceneCue(message){
+ const scene=$('.scene');if(!scene||motionReduced())return;
+ const badge=document.createElement('span');badge.className='battle-cue';badge.textContent=message;badge.setAttribute('aria-hidden','true');scene.appendChild(badge);
+}
+function animateCombatExchange(b,previous){
+ const scene=$('.scene');if(!scene||motionReduced())return;
+ const hero=scene.querySelector('.sprite:not(.monster) img'),enemy=scene.querySelector('.sprite.monster img');
+ if(!hero||!enemy)return;
+ preloadCombatFrames();
+ const foe=b.boss?'boss':'monster',heroSprite=hero.parentElement,foeSprite=enemy.parentElement;
+ const addHit=(sprite,delta,kind)=>{
+  if(!delta)return;const mark=document.createElement('span');mark.className=`battle-hit battle-hit-${kind}`;mark.setAttribute('aria-hidden','true');mark.textContent=(delta>0?'+':'−')+Math.abs(delta);sprite.closest('.battle-info')?.prepend(mark);
+ };
+ setCombatFrame(hero,'hero','attack');setCombatFrame(enemy,foe,'hurt');heroSprite.dataset.beat='strike';foeSprite.dataset.beat='hit';
+ addHit(foeSprite,b.enemyHp-previous.enemyHp,'enemy');
+ setTimeout(()=>{
+  if(!scene.isConnected||motionReduced()||b.enemyHp===0)return;
+  setCombatFrame(hero,'hero','hurt');setCombatFrame(enemy,foe,'attack');heroSprite.dataset.beat='hit';foeSprite.dataset.beat='strike';
+  const net=b.hp-previous.hp;addHit(heroSprite,net,net>0?'heal':'hero');
+ },210);
+ setTimeout(()=>{
+  if(!scene.isConnected)return;
+  setCombatFrame(hero,'hero','hd');setCombatFrame(enemy,foe,'hd');delete heroSprite.dataset.beat;delete foeSprite.dataset.beat;
+ },510);
+ if(b.result)sceneCue(b.result==='win'?'挑戰勝利':'挑戰失敗');
+}
+setInterval(async()=>{if(document.hidden||busy||!state.battle||state.battle.result==='lose')return;if(state.battle.result==='win'){let g=state.goals.find(x=>x.id===state.battle.goalId),c=g&&currentChapter(g);if(!c||c.bossDefeated||(c.stage>=c.stages&&c.milestones.some(m=>!m.done)))return}busy=true;try{const previous=state.battle;await mutate(s=>{if(!s.battle)return;if(!s.battle.result){combatTick(s);return}if(s.battle.result==='win'){let g=s.goals.find(x=>x.id===s.battle.goalId),c=g&&currentChapter(g);if(g&&c&&!c.bossDefeated&&(c.stage<c.stages||c.milestones.every(m=>m.done)))startBattle(s,g)}},page==='adventure'&&!modal.open);if(page==='adventure'&&!modal.open&&state.battle?.goalId===previous.goalId){if(state.battle.turn===previous.turn+1)animateCombatExchange(state.battle,previous);else if(previous.result==='win'&&state.battle.turn===0)sceneCue(state.battle.boss?'首領戰':'下一關')}}catch(e){console.error(e)}finally{busy=false}},1000);
 init().catch(e=>{console.error(e);$('#main').innerHTML='<div class="panel"><h2>無法開啟本機存檔</h2><p>請確認瀏覽器允許 IndexedDB，並使用一般瀏覽模式。</p></div>'});
 
 

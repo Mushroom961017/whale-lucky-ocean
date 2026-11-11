@@ -1,0 +1,54 @@
+/* Short cues use transforms and opacity; the battle and draw resolve before playback. */
+.menu-hero,.character-hero,.scene .sprite img{transform-origin:50% 92%;animation:eterra-idle 3.2s ease-in-out infinite}
+.character-hero{animation-delay:-.6s}
+.scene .sprite{animation:none;--strike-distance:13px;--recoil-distance:-4px}
+.scene .sprite.monster{--strike-distance:-13px;--recoil-distance:4px}
+.scene .sprite.monster img{animation-delay:-1.2s}
+.scene .sprite[data-beat="strike"] img{animation:eterra-strike 205ms cubic-bezier(.2,.8,.3,1) both}
+.scene .sprite[data-beat="hit"] img{animation:eterra-recoil 230ms ease-out both}
+.scene .sprite.monster img[src$="boss-attack.webp"]{scale:-1 1;transform:none}
+.battle-hit,.battle-cue{pointer-events:none;position:absolute;z-index:3;text-shadow:2px 2px #141a27}
+.battle-hit{top:12%;left:50%;font-size:clamp(16px,4vw,24px);font-variant-numeric:tabular-nums;animation:eterra-hit-label 460ms ease-out both}
+.battle-hit-enemy{color:#ffe5a2}.battle-hit-hero{color:#ffd0c8}.battle-hit-heal{color:#bcecd2}
+.battle-cue{top:12px;left:50%;max-width:calc(100% - 20px);padding:5px 13px;background:#172336ec;color:#ffe3a6;border:1px solid #c6a770;box-shadow:2px 2px #101a25;font-size:13px;font-weight:bold;white-space:nowrap;animation:eterra-battle-cue 720ms ease both}
+
+.mission-dispatch{border-top:1px solid #d6b178;padding:12px 4px 3px;background:linear-gradient(#bd9a5720,transparent 80%)}
+.mission-dispatch-head{display:flex;align-items:center;gap:10px}
+.mission-dispatch-head h2{margin:0;color:#ffe2a2}
+.mission-seal{display:grid;place-items:center;flex:0 0 32px;height:32px;border:1px solid #e0bd7d;box-shadow:inset 0 0 0 2px #634c2c,2px 2px #152238;background:#936c3b;color:#ffe8ae;animation:eterra-seal 370ms cubic-bezier(.2,.8,.35,1) both}
+.quest-settled{animation:eterra-quest-done 420ms ease-out}
+
+.draw-sequence .draw-stars{animation:eterra-stars 780ms ease-out both}
+.draw-sequence .draw-ring{animation:eterra-draw-ring 980ms ease-out both}
+.draw-sequence .draw-ticket{animation:eterra-draw-ticket 980ms cubic-bezier(.18,.75,.34,1) both}
+.prize-reveal .reveal-rays{animation:eterra-reveal-rays 570ms ease-out both}
+.prize-reveal .prize-sparkles{animation:eterra-stars 550ms ease-out both}
+.prize-reveal .prize-icon{animation:eterra-prize-in 380ms cubic-bezier(.2,.85,.35,1) both}
+.prize-reveal.rarity-A .prize-icon{animation-duration:540ms}
+.prize-reveal .prize-label,.prize-reveal h1,.prize-reveal .prize-flavor{animation:eterra-copy-in 240ms 70ms ease-out both}
+dialog:has(.draw-sequence),dialog:has(.prize-reveal){overflow:auto}
+
+@keyframes eterra-idle{0%,100%{translate:0 0;scale:1}50%{translate:0 -3px;scale:1 1.015}}
+@keyframes eterra-strike{0%,100%{translate:0 0}40%{translate:var(--strike-distance) -2px}}
+@keyframes eterra-recoil{0%,100%{translate:0 0}28%{translate:var(--recoil-distance) 0;filter:brightness(1.18) drop-shadow(0 1px 2px #ffc79388)}}
+@keyframes eterra-hit-label{0%{opacity:0;transform:translate(-50%,5px) scale(.85)}25%{opacity:1}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-19px)}}
+@keyframes eterra-battle-cue{0%{opacity:0;transform:translate(-50%,-5px)}18%,77%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-3px)}}
+@keyframes eterra-seal{0%{opacity:0;transform:scale(1.32) rotate(-12deg)}68%{opacity:1;transform:scale(.96) rotate(3deg)}100%{opacity:1;transform:scale(1)}}
+@keyframes eterra-quest-done{0%,100%{outline-color:transparent}0%,60%{outline:2px solid #a9dfbf;outline-offset:-2px}100%{outline:2px solid transparent;outline-offset:-2px}}
+@keyframes eterra-stars{0%{opacity:0;scale:.78}55%{opacity:1;scale:1.05}100%{opacity:.78;scale:1}}
+@keyframes eterra-draw-ring{0%{opacity:0;scale:.76}58%{opacity:.85;scale:1}100%{opacity:.5;scale:1.13}}
+@keyframes eterra-draw-ticket{0%{opacity:0;transform:translateY(11px) rotate(-7deg) scale(.94)}38%{opacity:1;transform:translateY(-5px) rotate(3deg) scale(1)}82%,100%{opacity:1;transform:translateY(0) rotate(0) scale(1)}}
+@keyframes eterra-reveal-rays{0%{opacity:0;transform:rotate(-12deg) scale(.62)}50%{opacity:.8}100%{opacity:.48;transform:rotate(8deg) scale(1)}}
+@keyframes eterra-prize-in{0%{opacity:0;transform:translateY(8px) scale(.8)}72%{opacity:1;transform:translateY(-2px) scale(1.025)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes eterra-copy-in{from{opacity:0;translate:0 4px}to{opacity:1;translate:0 0}}
+
+@supports(view-transition-name:lq-main){
+ ::view-transition-old(lq-main){animation-duration:110ms}
+ ::view-transition-new(lq-main){animation-duration:210ms}
+}
+@media(max-width:600px){.scene .sprite{--strike-distance:8px}.scene .sprite.monster{--strike-distance:-8px}}
+:is(.settings-reduced-motion) :is(.menu-hero,.character-hero,.scene .sprite img,.mission-seal,.quest-settled,.draw-sequence *, .prize-reveal *){animation:none!important}
+@media(prefers-reduced-motion:reduce){
+ :is(.menu-hero,.character-hero,.scene .sprite img,.mission-seal,.quest-settled,.draw-sequence *, .prize-reveal *){animation:none!important}
+ ::view-transition-old(lq-main),::view-transition-new(lq-main){animation:none}
+}

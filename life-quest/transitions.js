@@ -14,7 +14,7 @@ export function createTransitions({modal, content, motion, Observer, doc=globalT
     const animation = play(element, [
       {opacity: 0, transform: 'translateY(7px)'},
       {opacity: 1, transform: 'translateY(0)'}
-    ], {duration: 230, easing: 'cubic-bezier(.2,.75,.25,1)'});
+    ], {duration: 190, easing: 'cubic-bezier(.2,.75,.25,1)'});
     if (animation) animation.id = 'life-quest-page';
   };
   const observer = new Observer(() => {
@@ -24,7 +24,7 @@ export function createTransitions({modal, content, motion, Observer, doc=globalT
     const animation = play(content, [
       {opacity: 0, transform: 'translateY(8px) scale(.985)'},
       {opacity: 1, transform: 'translateY(0) scale(1)'}
-    ], {duration: 200, easing: 'cubic-bezier(.2,.75,.25,1)'});
+    ], {duration: 170, easing: 'cubic-bezier(.2,.75,.25,1)'});
     if (animation) animation.id = 'life-quest-dialog';
   });
   observer.observe(content, {childList: true});
@@ -48,7 +48,7 @@ export function createTransitions({modal, content, motion, Observer, doc=globalT
     const animation = play(modal, [
       {opacity: 1, transform: 'translateY(0) scale(1)'},
       {opacity: 0, transform: 'translateY(5px) scale(.99)'}
-    ], {duration: 140, easing: 'ease-in'});
+    ], {duration: 115, easing: 'ease-in'});
     if (!animation) { modal.close(); return; }
     closing = true;
     animation.onfinish = () => {
