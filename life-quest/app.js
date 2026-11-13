@@ -1,6 +1,7 @@
 import {prizeFlavor,prizeArtInfo} from './prize-catalog.js?v=20261105';
 import {CATEGORIES,THEMES,PRIZES,VARIANTS,PRICE,ENHANCE_COST,STARTER_NT,createCharacter,fresh,normalize,reward,claimQuest,questAvailable,addQuest,addChapter,addMilestone,validateBackup,draw,remainingTickets,poolDefinition,poolVariants,nextRound,enhance,stats,level,today,questKey,currentChapter,goalProgress,startBattle,combatTick,uuid} from './engine.js?v=prizes20261105';
 import {createTransitions} from './transitions.js?v=motion20261111';
+import {battleView,hpFraction} from './battle-view.js?v=20261113';
 import {parsePlanText,ensureUniqueGoal} from './plan-import.js?v=20261104';
 const $=s=>document.querySelector(s), esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=fresh(),page='menu',db,busy=false;
@@ -59,7 +60,32 @@ function progressNotice(result){
  open(`<section class="progress-celebration${complete?' progress-complete':''}" aria-labelledby="progress-result-title"><div class="progress-medal" aria-hidden="true">${complete?'★':'◆'}</div><div class="progress-copy"><h2 id="progress-result-title">${esc(title)}</h2><p>${esc(goal)}</p></div><div class="progress-meter" role="progressbar" aria-label="現實目標完成度" aria-valuenow="${after}"><span style="--from:${before/100};--to:${after/100}"></span></div><p class="progress-change">進度 <b>${before}% → ${after}%</b></p><div class="progress-rewards"><span>+${exp} EXP</span><span>+NT$ ${nt}</span></div><button class="primary" data-close>完成</button></section>`);
 }
 function rewardToast(message){let el=document.querySelector('#reward-feedback');if(!el){el=document.createElement('div');el.id='reward-feedback';el.setAttribute('role','status');el.setAttribute('aria-live','polite');document.body.appendChild(el)}el.textContent=message;el.classList.add('visible');clearTimeout(feedbackTimer);feedbackTimer=setTimeout(()=>el.classList.remove('visible'),3500)}
-function adventure(){let g=getGoal(),b=state.battle;if(!g)return title('你的冒險即將開始','現實中的每一步，都是角色成長的起點。')+`<div class="scene"><div class="sprite">🧙</div><div class="sprite monster">🐉</div></div><div class="panel"><h2>建立第一個人生目標</h2><p>先產生 GPT 計畫指令，將回傳的 JSON 匯入；或使用固定示範資料體驗。</p><button class="primary" data-page="tasks">前往目標計畫</button></div>`;let c=currentChapter(g),right=b&&b.goalId===g.id?b:null;return title('艾特拉大陸','戰鬥自動進行；角色成長資源只來自現實目標。')+`<div class="layout"><div><div class="scene"><div class="battle-info"><span class="sprite">🧙</span><b>${esc(state.character)}</b><span>HP ${right?right.hp:stats(state).hp}/${right?right.maxHp:stats(state).hp}</span></div><div class="battle-info"><span class="sprite monster">${right?.boss?'🐉':'👾'}</span><b>${right?.boss?esc(CATEGORIES[g.category][1]):'試煉魔物'}</b><span>${right?'HP '+right.enemyHp+'/'+right.enemyMax:'等待挑戰'}</span></div></div><div class="panel"><div class="row"><div><b>${esc(g.title)}</b><p>${esc(c.title)} · ${c.stage<c.stages?'一般關卡 '+(c.stage+1)+' / '+c.stages:'章節 Boss'} ${right?.result?'· '+(right.result==='win'?'勝利':'挑戰失敗'):''}</p></div><button class="primary" data-action="battle">${right&&!right.result?'戰鬥進行中':'開始／重新挑戰'}</button></div><p class="muted">戰鬥只在網頁開啟且可見時進行，不掉落 EXP、台幣或道具。</p></div></div><aside>${todayTasks(g)}<div class="panel"><h2>目前的目標</h2><p>${esc(g.title)}</p><div class="progress"><i style="width:${goalProgress(g)}%"></i></div><p>現實驗收進度 ${goalProgress(g)}%<br>截止日期 ${esc(g.deadline)}</p><button data-page="map">切換目標</button></div></aside></div>`}
+function hpMeter(id,name,hp,max){
+ const fill=hpFraction(hp,max),now=Number.isFinite(hp)?Math.min(max,Math.max(0,hp)):0;
+ return `<div class="battle-meter" role="meter" aria-label="${esc(name)}的生命值" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${now}" data-side="${id}" data-low="${fill<=.25}" style="--hp:${fill}"><i></i></div><span class="battle-hp-value">${now} / ${max} HP</span>`;
+}
+function battleActor({side,name,frame,hp,max}){
+ return `<div class="battle-info" data-side="${side}"><span class="sprite${side==='enemy'?' monster':''}"><img src="${frame}.webp" alt=""></span><div class="battle-plate"><b>${esc(name)}</b>${Number.isFinite(max)&&max>0?hpMeter(side,name,hp,max):'<span class="battle-hp-value">等待挑戰</span>'}</div></div>`;
+}
+function adventure(){
+ const g=getGoal();
+ if(!g)return title('你的冒險即將開始','現實中的每一步，都是角色成長的起點。')+`<div class="scene adventure-preview" data-cat="health"><div class="sprite"><img src="hero-hd.webp" alt="冒險者"></div><div class="sprite monster"><img src="monster-hd.webp" alt="試煉魔物"></div></div><div class="panel"><h2>建立第一個人生目標</h2><p>先產生 GPT 計畫指令，將回傳的 JSON 匯入；或使用固定示範資料體驗。</p><button class="primary" data-page="tasks">前往目標計畫</button></div>`;
+ const {chapter:c,current:b,arenaChapter,bossNext,missing,phase}=battleView(g,state.battle);
+ const boss=b?b.boss:bossNext,foe=boss?(arenaChapter.bossName||CATEGORIES[g.category][1]):'試煉魔物';
+ const hero=state.character||'冒險者',maxHp=Number.isFinite(b?.maxHp)&&b.maxHp>0?b.maxHp:stats(state).hp;
+ const result=b?.result==='win'||b?.result==='lose'?b.result:'';
+ const status=b?.result==='win'?'挑戰勝利':b?.result==='lose'?'挑戰失敗':phase==='fighting'?(boss?'首領戰':'戰鬥中'):'待命';
+ const detail=b?(b.turn?`第 ${b.turn} 回合 · ${b.log||'回合已結算'}`:'準備出擊'):'完成現實任務，強化冒險者';
+ let next,action;
+ if(phase==='fighting'){next='戰鬥自動進行，回合結果會即時更新。';action='<button class="primary" disabled>戰鬥進行中</button>'}
+ else if(phase==='locked'){next=`首領尚未解鎖：還需驗收 ${missing.length} 項現實里程碑。`;action='<button class="primary" data-action="battle-milestone">前往里程碑驗收</button>'}
+ else if(phase==='cleared'){next=g.outcome?'這條路線的所有章節與現實目標皆已完成。':'所有戰鬥章節已通關；完成現實成果後，即可驗收目標。';action=`<button class="primary" data-page="${g.outcome?'map':'tasks'}">${g.outcome?'探索其他路線':'查看成果驗收'}</button>`}
+ else if(phase==='elsewhere'){next='另一條路線正在戰鬥，請先返回查看。';action='<button class="primary" data-action="return-battle">返回進行中的戰鬥</button>'}
+ else if(phase==='advancing'){next=bossNext?'下一場為首領戰，即將自動開始。':'下一關即將自動開始。';action='<button class="primary" disabled>準備下一場</button>'}
+ else {next=phase==='retry'?'可先在角色頁調整裝備，或再次挑戰。':bossNext?'現實里程碑已達成，可以挑戰本章首領。':'準備就緒即可開始自動戰鬥。';action=`<button class="primary" data-action="battle">${phase==='retry'?'重新挑戰':bossNext?'挑戰首領':'開始挑戰'}</button>`}
+ const stage=c.bossDefeated?'章節全部通關':bossNext?'章節首領':`關卡 ${c.stage+1} / ${c.stages}`;
+ return title('艾特拉大陸','戰鬥自動進行；角色成長資源只來自現實目標。')+`<div class="layout adventure-layout"><div><div class="scene battle-arena" data-cat="${esc(g.category)}"><div class="battle-hud"><span class="battle-status" data-result="${result}">${status}</span><span class="battle-turn">${esc(detail)}</span></div>${battleActor({side:'hero',name:hero,frame:'hero-hd',hp:b?.hp??maxHp,max:maxHp})}${battleActor({side:'enemy',name:foe,frame:boss?'boss-hd':'monster-hd',hp:b?.enemyHp,max:b?.enemyMax})}</div><div class="panel battle-next" data-phase="${phase}"><div class="battle-next-head"><div><b>${esc(g.title)}</b><p>${esc(c.title)} · ${stage}</p></div>${action}</div><p class="battle-next-note">${esc(next)}</p>${phase==='locked'?`<ul class="battle-requirements">${missing.map(m=>`<li>${esc(m.title)}</li>`).join('')}</ul>`:''}<p class="muted battle-rules">僅在網頁可見時戰鬥，戰鬥不發放獎勵。</p></div></div><aside>${todayTasks(g)}<div class="panel"><h2>目前的目標</h2><p>${esc(g.title)}</p><div class="progress"><i style="width:${goalProgress(g)}%"></i></div><p>現實驗收進度 ${goalProgress(g)}%<br>截止日期 ${esc(g.deadline)}</p><button data-page="map">切換目標</button></div></aside></div>`;
+}
 function planIntro(){return `<section class="plan-start"><div><span class="plan-kicker">YOUR NEXT ADVENTURE</span><h2>把目標變成冒險</h2><p>建立計畫，從今天的一小步開始。</p></div><div class="plan-start-actions"><button class="primary" data-action="prompt">用 GPT 規劃</button><button data-action="import">貼上已有的 JSON</button><button data-action="manual-goal">手動建立</button></div><p class="plan-caption">不需 API Key · 獎勵由遊戲規則計算</p></section>`}
 function tasks(){return title('任務與計畫','把人生目標拆成可執行的每日行動。')+planIntro()+`<div class="plan-tools"><button data-action="edit-plan">重新安排計畫</button><button data-action="demo">載入示範目標</button></div>`+weekly()+(state.goals.length?state.goals.map(g=>`<section class="panel"><div class="row"><h2>${esc(g.title)}</h2><div><span class="tag">${esc(CATEGORIES[g.category][0])}</span> <button data-action="expand-plan" data-goal="${esc(g.id)}" ${g.outcome?'disabled':''}>擴充計畫</button></div></div><div class="grid">${taskCards(g)}</div><h3 style="margin-top:20px">現實里程碑</h3><div class="grid">${g.chapters.map(c=>c.milestones.map(m=>`<div class="card"><b>${esc(c.title)} · ${esc(m.title)}</b><p>${esc(m.criteria)}</p><button data-action="milestone" data-goal="${esc(g.id)}" data-id="${esc(m.id)}" ${m.done?'disabled':''}>${m.done?'已驗收':'確認驗收 · 80 EXP / NT$120'}</button></div>`).join('')).join('')}</div><p>最終達成條件：${g.successCriteria.map(esc).join('、')}</p><button data-action="outcome" data-goal="${esc(g.id)}" ${g.outcome?'disabled':''}>${g.outcome?'成果已驗收':'確認最終成果 · 150 EXP / NT$180'}</button></section>`).join(''):'<p>尚未匯入目標。</p>')}
 function map(){return title('艾特拉大陸','同一座世界，每個人生目標都有獨立的冒險路線。')+`<div class="grid">${Object.entries(CATEGORIES).map(([id,c])=>`<div class="card"><div class="row"><h2>${c[2]} ${c[0]}</h2><span class="tag">Boss · ${c[1]}</span></div>${state.goals.filter(g=>g.category===id).map(g=>`<p><b>${esc(g.title)}</b><br><span class="muted">${esc(currentChapter(g).title)} · 驗收 ${goalProgress(g)}%</span><br><button data-action="select" data-goal="${esc(g.id)}">選擇路線</button></p>`).join('')||'<p class="muted">尚無目標</p>'}</div>`).join('')}</div>`}
@@ -108,7 +134,6 @@ function promptDialog(){open(`<div class="plan-flow"><span class="plan-kicker">G
 function generatePrompt(){let g=$('#prompt-goal').value.trim(),start=$('#prompt-start').value,end=$('#prompt-deadline').value,cat=$('#prompt-category').value;if(!g||!start||!end||end<start){$('#prompt-error').textContent='請填寫目標並確認開始與截止日期。';return}let template={...sample,goalId:uuid(),goalTitle:g,startDate:start,deadline:end,goalCategory:cat};let prompt=`你是人生目標計畫教練。請以繁體中文為以下目標設計具體可執行的計畫：${g}。期間 ${start} 到 ${end}，分類 ${cat}。只輸出有效 JSON，不要 markdown。依此資料結構設計，保留 goalId、goalCategory、goalTitle、startDate、deadline、chapters、dailyQuests、successCriteria、bossChallenges。每章包含獨立 id、title、stages（1 到 20 的整數）及 milestones（各含獨立 id、title、criteria）；每日任務有獨立 id、title、difficulty（easy、normal、hard）、recurring。根據目標規模決定章節數，提供可驗證的現實里程碑與成果條件。獎勵由系統決定，請勿提供獎勵金額。範例格式：\n${JSON.stringify(template,null,2)}`;open(`<div class="plan-flow"><span class="plan-kicker">GPT PLAN · STEP 2</span><h2>複製指令給 GPT</h2><p>複製後貼給 GPT；取得回覆，再回來貼上 JSON。</p><textarea id="generated" readonly aria-label="GPT 計畫指令"></textarea><p id="copy-feedback" class="plan-feedback" role="status"></p><div class="plan-actions"><button class="primary" data-action="copy">複製指令</button><a class="plan-link" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">開啟 ChatGPT ↗</a><button data-action="import">貼上回覆</button><button data-close>關閉</button></div></div>`);$('#generated').value=prompt}
 function datePlus(date,days){let x=new Date(date+'T12:00:00Z');x.setUTCDate(x.getUTCDate()+days);return x.toISOString().slice(0,10)}
 function weekly(){let date=today();return `<section class="panel"><h2>📅 未來七日計畫</h2><div class="week">${Array.from({length:7},(_,i)=>{let d=datePlus(date,i),day=['日','一','二','三','四','五','六'][new Date(d+'T12:00:00Z').getUTCDay()];let rows=state.goals.flatMap(g=>g.quests.filter(q=>questAvailable(g,q,d)).map(q=>`<p>${esc(g.title)}<br><b>${esc(q.title)}</b></p>`));return `<div class="card"><b>${d.slice(5)} 週${day}</b>${rows.join('')||'<p class="muted">休息日</p>'}</div>`}).join('')}</div></section>`}
-const baseAdventure=adventure;adventure=()=>{let g=getGoal(),html=baseAdventure(),boss=CATEGORIES[g?.category]?.[1],name=g&&currentChapter(g).bossName;if(boss&&name)html=html.replace(esc(boss),esc(name));return html.replace('<div class="scene">',`<div class="scene" data-cat="${esc(g?.category||'health')}">`).replace('🧙','<img src="hero-hd.webp" alt="冒險者">').replace(/🐉|👾/,'<img src="'+(state.battle?.boss?'boss-hd.webp':'monster-hd.webp')+'" alt="敵人">')};
 function regionArt(id){return `<span class="art-icon region-art region-${esc(id)}" aria-hidden="true"></span>`}
 const regionPositions={study:[20,25],fitness:[53,19],career:[76,29],finance:[60,45],health:[18,59],creative:[42,73],social:[27,82],other:[81,68]};
 map=()=>{const active=getGoal()?.category;return title('艾特拉大陸','點選地圖上的地點，查看該區域的人生目標與冒險路線。')+`<section class="map-explore" aria-label="艾特拉大陸世界地圖"><div class="map-legend"><b>世界地圖</b><span>選擇一個地點</span></div>${Object.entries(CATEGORIES).map(([id,c])=>{let [x,y]=regionPositions[id],count=state.goals.filter(g=>g.category===id).length;return `<button class="map-location" style="--x:${x}%;--y:${y}%" data-action="region-open" data-region="${id}" data-active="${id===active}" aria-label="${esc(c[0])}，${count} 個目標${id===active?'，目前路線所在區域':''}"><span class="map-marker">${regionArt(id)}</span><span class="map-label">${esc(c[0])}${count?` <b>${count}</b>`:''}</span></button>`}).join('')}</section>`};
@@ -214,6 +239,14 @@ document.addEventListener('click',async e=>{let el=e.target.closest('button');if
   });progressNotice(result);
  }
  if(a==='select')await selectRoute(el.dataset.goal);
+ if(a==='battle-milestone'){
+  const goal=getGoal(),missing=goal&&battleView(goal,state.battle).missing[0];
+  navigateTo('tasks',()=>{
+   const button=[...document.querySelectorAll('button[data-action="milestone"]')].find(x=>x.dataset.goal===goal?.id&&x.dataset.id===missing?.id);
+   button?.focus({preventScroll:true});button?.scrollIntoView({block:'center'});
+  });
+ }
+ if(a==='return-battle'){await mutate(s=>{if(!s.battle||s.battle.result||!s.goals.some(g=>g.id===s.battle.goalId))throw Error('原戰鬥已結束');s.activeGoal=s.battle.goalId})}
  if(a==='battle'){await mutate(s=>{if(s.battle&&!s.battle.result)throw Error('戰鬥正在進行');startBattle(s,s.goals.find(x=>x.id===s.activeGoal)||s.goals[0])});if(page==='adventure'){preloadCombatFrames();sceneCue(state.battle?.boss?'首領戰':'挑戰開始')}}
  if(a==='draw'){const item=await mutate(s=>draw(s));startDrawReveal(item)}
  if(a==='reveal')revealPrize();
@@ -247,6 +280,11 @@ function animateCombatExchange(b,previous){
  if(!hero||!enemy)return;
  preloadCombatFrames();
  const foe=b.boss?'boss':'monster',heroSprite=hero.parentElement,foeSprite=enemy.parentElement;
+ for(const [side,hp,max,delay] of [['hero',previous.hp,b.maxHp,205],['enemy',previous.enemyHp,b.enemyMax,0]]){
+  const fill=scene.querySelector(`.battle-meter[data-side="${side}"] i`);
+  const current=side==='hero'?b.hp:b.enemyHp;
+  if(fill&&current!==hp)fill.animate?.([{transform:`scaleX(${hpFraction(hp,max)})`},{transform:`scaleX(${hpFraction(current,max)})`}],{duration:260,delay,fill:'backwards',easing:'cubic-bezier(.2,.72,.25,1)'});
+ }
  const addHit=(sprite,delta,kind)=>{
   if(!delta)return;const mark=document.createElement('span');mark.className=`battle-hit battle-hit-${kind}`;mark.setAttribute('aria-hidden','true');mark.textContent=(delta>0?'+':'−')+Math.abs(delta);sprite.closest('.battle-info')?.prepend(mark);
  };
