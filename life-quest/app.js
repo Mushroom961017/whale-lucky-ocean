@@ -133,7 +133,7 @@ function promptDialog(){open(`<div class="plan-flow"><span class="plan-kicker">G
 function generatePrompt(){let g=$('#prompt-goal').value.trim(),start=$('#prompt-start').value,end=$('#prompt-deadline').value,cat=$('#prompt-category').value;if(!g||!start||!end||end<start){$('#prompt-error').textContent='請填寫目標並確認開始與截止日期。';return}let template={...sample,goalId:uuid(),goalTitle:g,startDate:start,deadline:end,goalCategory:cat};let prompt=`你是人生目標計畫教練。請以繁體中文為以下目標設計具體可執行的計畫：${g}。期間 ${start} 到 ${end}，分類 ${cat}。只輸出有效 JSON，不要 markdown。依此資料結構設計，保留 goalId、goalCategory、goalTitle、startDate、deadline、chapters、dailyQuests、successCriteria、bossChallenges。每章包含獨立 id、title、stages（1 到 20 的整數）及 milestones（各含獨立 id、title、criteria）；每日任務有獨立 id、title、difficulty（easy、normal、hard）、recurring。根據目標規模決定章節數，提供可驗證的現實里程碑與成果條件。獎勵由系統決定，請勿提供獎勵金額。範例格式：\n${JSON.stringify(template,null,2)}`;open(`<div class="plan-flow"><span class="plan-kicker">GPT PLAN · STEP 2</span><h2>複製指令給 GPT</h2><p>複製後貼給 GPT；取得回覆，再回來貼上 JSON。</p><textarea id="generated" readonly aria-label="GPT 計畫指令"></textarea><p id="copy-feedback" class="plan-feedback" role="status"></p><div class="plan-actions"><button class="primary" data-action="copy">複製指令</button><a class="plan-link" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">開啟 ChatGPT ↗</a><button data-action="import">貼上回覆</button><button data-close>關閉</button></div></div>`);$('#generated').value=prompt}
 function datePlus(date,days){let x=new Date(date+'T12:00:00Z');x.setUTCDate(x.getUTCDate()+days);return x.toISOString().slice(0,10)}
 const boardFilters=[['pending','待完成'],['done','已完成'],['all','全部']];
-let boardFilter='pending',boardPage=0,weekDay=0;
+let boardFilter='pending',boardPage=0,weekDay=null;
 function dailyBoard(date,{rows,done}){
  const pending=rows.length-done, filtered=rows.filter(row=>boardFilter==='all'||(boardFilter==='done'?row.done:!row.done));
  const perPage=6,pages=Math.max(1,Math.ceil(filtered.length/perPage));
@@ -143,9 +143,11 @@ function dailyBoard(date,{rows,done}){
  return `<section class="panel daily-board" aria-labelledby="daily-board-title"><div class="daily-head"><div><p class="daily-kicker">ETERRA · 冒險公會</p><h2 id="daily-board-title">今日任務</h2><p>所有目標 · ${date}</p></div><span class="daily-tally"><strong>${done}</strong> / ${rows.length}<small>已完成</small></span></div>${rows.length?`<progress aria-label="今日任務完成度" value="${done}" max="${rows.length}">${done} / ${rows.length}</progress>`:''}<div class="daily-filters" role="group" aria-label="任務狀態">${boardFilters.map(([id,label])=>`<button data-action="board-filter" data-filter="${id}" aria-pressed="${boardFilter===id}">${label} <span>${counts[id]}</span></button>`).join('')}</div><ul class="daily-list">${filtered.slice(boardPage*perPage,(boardPage+1)*perPage).map(({goal,quest,done})=>`<li class="daily-entry${done?' daily-done':''}"><div><b>${esc(quest.title)}</b><small>${esc(goal.title)} · ${rewardDesc[quest.difficulty]}</small></div>${done?'<span class="daily-state">✓ 已完成</span>':`<button data-action="board-claim" data-goal="${esc(goal.id)}" data-id="${esc(quest.id)}" aria-label="完成任務：${esc(quest.title)}（${esc(goal.title)}）">完成</button>`}</li>`).join('')||`<li class="daily-empty">${empty}</li>`}</ul>${pages>1?`<div class="daily-paging"><button data-action="board-page" data-index="${boardPage-1}" ${boardPage===0?'disabled':''}>上一頁</button><span>第 ${boardPage+1} / ${pages} 頁</span><button data-action="board-page" data-index="${boardPage+1}" ${boardPage>=pages-1?'disabled':''}>下一頁</button></div>`:''}</section>`;
 }
 function weekly(date,agenda){
- const days=Array.from({length:7},(_,i)=>{const value=datePlus(date,i);return {date:value,label:i===0?'今天':'週'+['日','一','二','三','四','五','六'][new Date(value+'T12:00:00Z').getUTCDay()],...agenda.forDay(value)}});
- const selected=days[weekDay];
- return `<section class="panel week-planner"><h2>未來七日計畫</h2><div class="week-tabs" role="group" aria-label="選擇計畫日期">${days.map((day,i)=>`<button data-action="week-day" data-index="${i}" aria-pressed="${i===weekDay}" aria-label="${day.date}，${day.rows.length} 項任務"><span>${day.label}</span><b>${day.date.slice(5).replace('-','/')}</b><small>${day.rows.length} 項</small></button>`).join('')}</div><div class="week-selection" aria-label="${selected.date} 的計畫"><h3>${selected.date} · ${selected.rows.length} 項任務</h3>${selected.rows.length?`<ul class="week-list" tabindex="0" aria-label="當日任務清單">${selected.rows.map(({goal,quest,done})=>`<li><span><b>${esc(quest.title)}</b><small>${esc(goal.title)}</small></span><span class="week-row-state">${done?'已完成':weekDay===0?'待完成':'已排定'}</span></li>`).join('')}</ul>`:'<p class="muted">這天沒有排定的任務。</p>'}</div></section>`;
+ const days=Array.from({length:7},(_,i)=>{const value=datePlus(date,i);return {date:value,...agenda.forDay(value)}});
+ const selected=weekDay===null?null:days[weekDay];
+ const dayButtons=days.map((day,i)=>`<button data-action="week-day" data-index="${i}" aria-expanded="${i===weekDay}" aria-controls="week-selection" ${i===0?'aria-current="date"':''} aria-label="${i===0?'今天，':''}${day.date}，${day.rows.length} 項任務"><b>${day.date.slice(5).replace('-','/')}</b><small>${day.rows.length} 項</small></button>`).join('');
+ const body=selected?`<h3>${selected.date.slice(5).replace('-','/')} 的任務</h3>${selected.rows.length?`<ul class="week-list" aria-label="當日任務清單">${selected.rows.map(({goal,quest,done})=>`<li><details><summary><b>${esc(quest.title)}</b></summary><div class="week-item-detail"><strong>${esc(quest.title)}</strong><small>${esc(goal.title)} · ${done?'已完成':weekDay===0?'待完成':'已排定'}</small></div></details></li>`).join('')}</ul>`:'<p class="muted">沒有排定任務。</p>'}`:'';
+ return `<section class="panel week-planner"><h2>未來七日計畫</h2><div class="week-tabs" role="group" aria-label="選擇計畫日期">${dayButtons}</div><div id="week-selection" class="week-selection" ${selected?'':'hidden'}>${body}</div></section>`;
 }
 function regionArt(id){return `<span class="art-icon region-art region-${esc(id)}" aria-hidden="true"></span>`}
 const regionPositions={study:[20,25],fitness:[53,19],career:[76,29],finance:[60,45],health:[18,59],creative:[42,73],social:[27,82],other:[81,68]};
@@ -196,7 +198,10 @@ document.addEventListener('click',async e=>{let el=e.target.closest('button');if
   boardPage=Math.max(0,Number(el.dataset.index)||0);render();($('.daily-paging button:not(:disabled)')||$('.daily-filters [aria-pressed="true"]'))?.focus();
  }
  if(a==='week-day'){
-  weekDay=Math.min(6,Math.max(0,Number(el.dataset.index)||0));render();$('.week-tabs [aria-pressed="true"]')?.focus();
+  const index=Number(el.dataset.index);
+  if(Number.isInteger(index)&&index>=0&&index<7){
+   weekDay=weekDay===index?null:index;render();$(`.week-tabs [data-index="${index}"]`)?.focus({preventScroll:true});
+  }
  }
  if(a==='today-page'){todayPage=Math.max(0,Number(el.dataset.index)||0);render()}
  if(a==='quick-quest'){let r=await mutate(s=>claimQuest(s,el.dataset.goal,el.dataset.id));cueQuest(el.dataset.id,el.dataset.goal,'quick-quest');rewardToast('任務完成！獲得 '+r.exp+' EXP 與 NT$'+r.nt)}
