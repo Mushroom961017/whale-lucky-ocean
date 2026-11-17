@@ -35,3 +35,24 @@
 @media(max-width:600px){.daily-board{padding:9px 10px}.daily-filters button{flex:1;min-width:0}.daily-entry{padding-left:6px}}
 @media(max-width:370px){.week-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}.daily-filters button{padding-inline:3px}.menu-summary>.menu-today{padding-inline:5px}}
 .daily-tally strong{display:inline-block}
+
+/* Keep goal plans condensed until their controls are needed. */
+.goal-plans h2{margin:0 0 8px}.goal-plans h2::after{content:none}
+.goal-plans h2 small{display:inline;margin:0 0 0 5px;font-size:12px;color:#b8cbd2}
+.goal-plan-list{display:grid;gap:5px}
+.goal-plan{min-width:0;border:1px solid #6b7b81;background:#142438aa}
+.goal-plan[open]{border-color:#b29a6c}
+.goal-plan>summary{display:flex;align-items:center;gap:8px;padding:7px 10px;min-height:49px;list-style:none;cursor:pointer}
+.goal-plan>summary::-webkit-details-marker{display:none}
+.goal-plan>summary::before{content:"";width:0;height:0;border:4px solid transparent;border-left-color:#e4c68c;flex:none}
+.goal-plan[open]>summary::before{transform:rotate(90deg)}
+.goal-plan>summary:focus-visible{outline:2px solid #ffd881;outline-offset:-2px}
+.goal-plan-copy{min-width:0;flex:1}.goal-plan-copy strong,.goal-plan-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.goal-plan[open] .goal-plan-copy strong{white-space:normal;overflow-wrap:anywhere}
+.goal-plan-copy strong{font-size:14px;color:#f8e4bd}.goal-plan-copy small{margin:2px 0 0;font-size:11px;color:#bdced2}
+.goal-plan-badge{flex:none;padding:3px 6px;border:1px solid #9a8460;background:#353026;color:#f5d79d;font-size:12px;font-variant-numeric:tabular-nums}
+.goal-plan-badge[data-complete=true]{border-color:#7ca58c;background:#203b33;color:#c4ebd4}
+.goal-plan-body{padding:8px 10px 10px;border-top:1px solid #617078;overflow-wrap:anywhere}
+.goal-plan-body h3{margin:10px 0 4px;font-size:14px;color:#f3d59b}
+.goal-plan-body p{margin:3px 0 6px}
+@media(max-width:600px){.goal-plan>summary,.goal-plan-body{padding-inline:7px}}
