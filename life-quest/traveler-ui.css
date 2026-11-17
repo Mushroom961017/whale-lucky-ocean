@@ -1,0 +1,240 @@
+/* Eterra's travel journal: warm light, inked panels and restrained brass. */
+:root {
+  --travel-ink:#f3ebd9;
+  --travel-muted:#c7c0b1;
+  --travel-gold:#edce91;
+  --travel-brass:#9b8053;
+  --travel-light:#f7e3b6;
+  --travel-frame:#695b44;
+  --travel-panel:linear-gradient(145deg,#292b27,#1b1e20 75%);
+  --travel-shadow:inset 0 0 0 2px #151716,inset 0 3px #dfbd7c26,0 4px 12px #06080880;
+  --travel-serif:"Noto Serif TC","Songti TC","PMingLiU",Georgia,serif;
+  --gold:var(--travel-gold);
+  --ink:var(--travel-ink);
+  --sub:var(--travel-muted);
+}
+
+body {
+  min-height:100vh;
+  background:#131719 radial-gradient(ellipse at 64% -18%,#473c2e 0%,#232522 35%,#131719 80%) no-repeat;
+  color:var(--travel-ink);
+}
+header {
+  background:linear-gradient(180deg,#20201d,#131617);
+  border-bottom:1px solid var(--travel-brass);
+  box-shadow:0 1px #0a0b0c,0 5px 16px #0006;
+}
+header .travel-brand {display:flex;align-items:center;gap:9px;min-width:0}
+.travel-brand img {width:32px;height:32px;flex:none}
+header .travel-brand strong {
+  display:block;font-family:Georgia,serif;font-weight:600;line-height:1.05;
+  text-shadow:0 2px #08090a;letter-spacing:.14em;color:var(--travel-light);
+}
+header .travel-brand small {color:var(--travel-muted);font-size:10px;line-height:1.1}
+#status {color:var(--travel-light);font-variant-numeric:tabular-nums}
+#status > span:last-child {color:var(--travel-muted)}
+main h1,main h2,dialog h2 {font-family:var(--travel-serif);color:var(--travel-light);text-shadow:0 2px 2px #0a0b0c80}
+main h1 {letter-spacing:.065em}
+p,.lead,.muted {color:var(--travel-muted)}
+input,select,textarea {background:#141817;border-color:var(--travel-frame);color:var(--travel-ink)}
+
+.panel,.card,.character-stats,.character-bag,.settings-panel,.draw-summary,.draw-footer,.menu-goal,
+.menu-summary>div,.menu-summary>.menu-today {
+  background:var(--travel-panel);border:1px solid var(--travel-frame);box-shadow:var(--travel-shadow);
+}
+.panel h2,.card h2,.character-stats h2 {color:var(--travel-light)}
+.card:hover {border-color:var(--travel-brass)}
+.tag {color:#dcd8bf;border-color:#786a51;background:#262721}
+.lead {max-width:70ch}
+main h1 + .lead::after {
+  content:"";display:block;width:min(180px,48%);height:8px;margin-top:5px;
+  background:linear-gradient(90deg,var(--travel-brass),transparent) 0 50%/100% 1px no-repeat;
+}
+
+:where(button,.button) {color:var(--travel-ink)}
+button:not(.primary,.danger,.map-location) {
+  background:linear-gradient(#36342b,#222521);border:1px solid #807052;
+  color:var(--travel-ink);box-shadow:inset 0 1px #f0d39e21,0 2px 3px #090b0b80;
+}
+button.primary,.menu-continue {
+  background:linear-gradient(180deg,#725734,#513c26);border:1px solid #cea76c;
+  color:#fff2d7;box-shadow:inset 0 0 0 2px #382c21,inset 0 3px #edc68454,0 3px 8px #0007;
+}
+button:focus-visible,.goal-plan summary:focus-visible,.week-list summary:focus-visible {
+  outline:2px solid #ffdb8e;outline-offset:2px;
+}
+button.danger {background:#532e2b;border-color:#af7668;color:#fff0e4}
+button:disabled {opacity:.58}
+@media(hover:hover) {
+  button:not(:disabled):hover {border-color:var(--travel-gold)}
+}
+
+#nav {
+  background:linear-gradient(#20211e,#121516);border-top:1px solid var(--travel-brass);
+  box-shadow:0 -4px 16px #070909b3;
+}
+#nav button {position:relative;border:1px solid transparent;color:#ded5c4;background:transparent;box-shadow:none}
+#nav button[aria-current=page] {
+  border-color:#8c744d;color:#ffe5ac;background:radial-gradient(ellipse at 50% 0%,#625131,#2c2b22 70%);
+  box-shadow:inset 0 -2px #cba267,inset 0 0 0 2px #161714;
+}
+#nav button[aria-current=page]::before {
+  content:"";width:5px;height:5px;position:absolute;left:calc(50% - 3px);top:-3px;transform:rotate(45deg);
+  background:var(--travel-gold);box-shadow:0 0 8px #f2c77580;pointer-events:none;
+}
+
+.menu-scene {
+  border:1px solid #b19463;box-shadow:var(--travel-shadow);
+  background-position:center 45%;
+}
+.menu-scene-shade {
+  background:linear-gradient(90deg,#101413f5 0%,#151815d9 29%,#1717144d 60%,transparent 83%),
+    linear-gradient(0deg,#11150fea,transparent 32%,transparent 83%,#1a180f60);
+}
+.menu-scene::after {
+  content:"";position:absolute;inset:4px;border:1px solid #f6ca785c;
+  clip-path:polygon(0 0,32px 0,32px 100%,0 100%,0 0,100% 0,100% 100%,calc(100% - 32px) 100%,calc(100% - 32px) 0);
+  pointer-events:none;z-index:3;
+}
+.menu-welcome {max-width:490px}
+.menu-overline,.menu-label,.char-kicker,.stats-heading span,.draw-eyebrow,.daily-kicker,.settings-heading>span {color:#d8b983}
+.menu-welcome h1 {
+  font-size:clamp(32px,4vw,55px);line-height:1.16;letter-spacing:.11em;font-weight:700;
+  margin:5px 0 7px;text-shadow:0 3px 1px #10110f,0 0 24px #f4c2783d;
+}
+.menu-welcome p {color:#efe5d0}
+.menu-hero {right:19%;filter:drop-shadow(0 9px 4px #0c120ed9) drop-shadow(0 0 9px #f6c17a70)}
+button.menu-continue {
+  background:linear-gradient(90deg,#6e5430,#483724);
+  border:1px solid #c6a26c;box-shadow:inset 0 0 0 2px #30251b,0 4px 10px #0008;
+}
+.menu-continue small,.menu-shortcut small,.menu-goal small,.menu-section-heading span,.menu-help {color:var(--travel-muted)}
+.menu-summary>.menu-today {background:linear-gradient(140deg,#413824,#272a22 85%);border-color:#a48858}
+.menu-section-heading {border-bottom:1px solid #a4885866;padding-bottom:1px}
+.menu-section-heading h2 {margin-bottom:4px}
+button.menu-shortcut {
+  background:linear-gradient(110deg,#342e24,#202421 75%);
+  border-color:#6f5e46;box-shadow:inset 0 0 0 2px #151714,0 2px 5px #0007;
+}
+.menu-shortcut .nav-art {box-shadow:0 0 0 1px #a78b6066}
+.menu-shortcut .menu-arrow {color:#d0ac75}
+
+.battle-arena,.adventure-preview {
+  border:1px solid #b49867;box-shadow:var(--travel-shadow);
+}
+.battle-arena::after,.adventure-preview::after {
+  inset:0;height:auto;opacity:1;pointer-events:none;
+  background:radial-gradient(ellipse at 62% 21%,#ffcf8142,transparent 47%),
+    linear-gradient(0deg,#101611c9,transparent 33%,transparent 67%,#16150e54);
+  box-shadow:inset 0 0 0 3px #1717117a,inset 0 0 30px 6px #181711a0;
+}
+.battle-hud,.battle-plate {
+  background:linear-gradient(165deg,#28271df2,#10130fe8);border:1px solid #a58a60;
+  box-shadow:inset 0 0 0 1px #161914,0 3px 8px #0709079e;
+}
+.battle-arena .battle-plate b,.battle-turn {color:#f3ead7}
+.battle-hp-value {color:#f3e8ce}
+.battle-next[data-phase=locked] {border-left:3px solid #c5a267}
+.battle-next[data-phase=cleared] {border-left:3px solid #87b596}
+
+.daily-board,.today-panel {border-color:#987d53;background:linear-gradient(136deg,#343225,#212720 72%)}
+.plan-start {
+  border:1px solid #a88a5c;box-shadow:var(--travel-shadow);
+  background:linear-gradient(90deg,#23241ff5,#23261ec9),url("battle-hd.webp") center 48%/cover;
+}
+.daily-entry,.week-list li {background:#161b17b3;border-left-color:#b0905f}
+.daily-entry small,.week-list small,.today-panel small {color:#d3cdbb}
+.daily-filters button[aria-pressed=true],.bag-filters button[aria-pressed=true],
+.week-tabs button[aria-expanded=true] {
+  background:#4b3d26;color:#ffebc3;border-color:#c09d63;box-shadow:inset 0 -2px #e4b875;
+}
+.week-tabs button[aria-current=date] {border-top-color:#dbb678}
+.goal-plan {background:#20241e;border-color:#766449}
+.goal-plan summary {background:linear-gradient(100deg,#332e23,#242822)}
+.goal-plan summary small {color:var(--travel-muted)}
+.today-panel .today-quest[aria-checked=true],.daily-state[data-done=true] {color:#b4dcc1}
+.progress {background:#161b17;border-color:#827457}
+.progress i {background:linear-gradient(90deg,#4e8969,#acd4a6)}
+
+.map-explore {border:2px solid #bd9d68;box-shadow:var(--travel-shadow)}
+.map-explore::before {
+  content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 0 3px #251d1aa6,inset 0 0 50px 9px #3a291c88;
+}
+.map-explore::after {
+  content:"";position:absolute;top:10px;right:10px;width:50px;height:50px;pointer-events:none;
+  background:#252319eb url("eterra-compass.svg") center/75% no-repeat;border:1px solid #b59561;
+}
+.map-legend,.map-label {background:#22231af2;border-color:#ac9161;color:#fff1cf}
+.map-marker {border:1px solid #ae9063;box-shadow:0 0 0 2px #22251d,0 4px 8px #151710a0}
+.map-location[data-active=true] .map-label {background:#654b27;border-color:#f7d495}
+.map-location[data-active=true] .map-marker {border-color:#f7d495;box-shadow:0 0 0 2px #38291b,0 0 10px #fac775ad}
+
+.character-stage {
+  background:radial-gradient(ellipse at 50% 55%,#bd8d4c55,transparent 48%),
+    linear-gradient(180deg,#373126,#202422 82%);
+  border:1px solid #a98c5e;box-shadow:var(--travel-shadow);
+}
+.hero-center {isolation:isolate}
+.hero-center::before {
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:url("eterra-compass.svg") center 28%/min(82%,198px) auto no-repeat;
+  opacity:.42;
+}
+.hero-aura {background:#e1aa6466}
+.hero-name {background:#181a16e8;border:1px solid #86704c;color:#fff0ca}
+.hero-name span,.stats-grid small,.skill-summary p {color:var(--travel-muted)}
+.stats-grid>div,.gear-slot,.character-bag .item-cell {
+  background:linear-gradient(155deg,#343329,#20241f);border-color:#7d6b4f;
+  box-shadow:inset 0 0 0 1px #131714;
+}
+.gear-slot .slot-label {color:var(--travel-gold)}
+.item-cell .item-title {color:#f4eccf}
+.character-bag .tier-A {border-color:#cfa563}
+.character-bag .tier-B {border-color:#9799bb}
+.character-bag .tier-C {border-color:#b298b8}
+.character-bag .tier-D {border-color:#83a397}
+.character-bag .tier-E {border-color:#887354}
+
+.draw-tier {--tier-trim:#bfa47b;position:relative;background:#252620;border:1px solid var(--tier-trim);box-shadow:0 4px 9px #0008}
+.draw-tier:nth-child(1) {--tier-trim:#d6ac63}
+.draw-tier:nth-child(2) {--tier-trim:#a1a7ca}
+.draw-tier:nth-child(3) {--tier-trim:#bfa2c4}
+.draw-tier:nth-child(4) {--tier-trim:#91aa9a}
+.draw-tier .prize-art {position:relative}
+.draw-tier .prize-art::after {
+  content:"";position:absolute;inset:3px;box-shadow:inset 0 0 0 1px #e1bf7854,inset 0 0 24px #150d09a6;
+  pointer-events:none;
+}
+.tier-copy {background:linear-gradient(150deg,#353025,#202420);border-top:1px solid var(--tier-trim)}
+.tier-name b {font-family:var(--travel-serif);color:#fff0c8;font-size:16px}
+.tier-numbers span,.tier-name span,.draw-note,.draw-summary span {color:var(--travel-muted)}
+.tier-numbers strong {color:var(--travel-light);font-variant-numeric:tabular-nums}
+.draw-shortfall {background:#3b3022;color:#fff1cf}
+.prize-reveal .prize-art {border-color:#cdb074}
+.draw-balance b,.draw-summary b {color:var(--travel-light);font-variant-numeric:tabular-nums}
+
+dialog {
+  background:linear-gradient(150deg,#302d23,#1c201c 78%);border:1px solid #c0a16e;color:var(--travel-ink);
+  box-shadow:inset 0 0 0 3px #151915,inset 0 0 0 4px #766346,0 13px 36px #0009;
+}
+dialog::backdrop {background:#0b0d0bc7}
+.settings-danger {border-color:#ac7668}
+th,td {border-bottom-color:#70604b}
+
+@media(max-width:600px) {
+  header .travel-brand strong {font-size:16px;letter-spacing:.09em}
+  .travel-brand img {width:27px;height:27px}
+  header .travel-brand {gap:6px}
+  .menu-scene {background-position:62% center}
+  .menu-scene-shade {background:linear-gradient(90deg,#111512ee,#151815b5 64%,#15181533),linear-gradient(0deg,#101510b3,transparent 37%)}
+  .menu-hero {right:2%;height:133px}
+  .menu-welcome {max-width:78%;padding:17px 13px}
+  .menu-welcome h1 {font-size:clamp(26px,7.6vw,38px);letter-spacing:.06em}
+  #nav button {min-height:48px}
+  .map-explore::after {height:33px;width:33px;top:7px;right:7px}
+}
+@media(max-width:360px) {
+  .menu-welcome {max-width:84%}
+  .menu-hero {right:-1%;height:114px}
+}
