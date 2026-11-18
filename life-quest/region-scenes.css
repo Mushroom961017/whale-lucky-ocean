@@ -1,0 +1,51 @@
+/* Regional illustrations are separate files, so visiting one area only loads its painting. */
+.region-scenery[data-cat=study]    {--region-view:url("scenes/study.webp");   --metal:#dbb475}
+.region-scenery[data-cat=fitness]  {--region-view:url("scenes/fitness.webp"); --metal:#e2a281}
+.region-scenery[data-cat=career]   {--region-view:url("scenes/career.webp");  --metal:#e8a46c}
+.region-scenery[data-cat=finance]  {--region-view:url("scenes/finance.webp"); --metal:#e2c675}
+.region-scenery[data-cat=health]   {--region-view:url("scenes/health.webp");  --metal:#9bc89e}
+.region-scenery[data-cat=creative] {--region-view:url("scenes/creative.webp");--metal:#c7a8d7}
+.region-scenery[data-cat=social]   {--region-view:url("scenes/social.webp");  --metal:#98c6cf}
+.region-scenery[data-cat=other]    {--region-view:url("scenes/other.webp");   --metal:#b7a6e0}
+
+.scene.region-scenery[data-cat] {
+  background:#23251f var(--region-view) center 55%/cover no-repeat;
+  border-color:var(--metal);image-rendering:auto;
+}
+.scene.region-scenery::before {content:none}
+.scene.region-scenery::after {
+  background:linear-gradient(0deg,#1114109c,transparent 34%,transparent 80%,#13161038);
+  box-shadow:inset 0 0 0 2px #271d133d,inset 0 0 15px #0d0e0e60;
+}
+.region-scenery .battle-hud {border-left:3px solid var(--metal)}
+.scene.battle-arena.region-scenery[data-cat] {
+  /* Anchor the illustrated floor at the actors' feet, above the HP plates. */
+  --plate-depth:62px;
+  background-position:center calc(100% - var(--plate-depth));background-color:#1e201b;
+}
+.scene.battle-arena.region-scenery::after {
+  background:linear-gradient(to top,#141711 0,#24251f var(--plate-depth),#16171257 calc(var(--plate-depth) + 7px),transparent calc(var(--plate-depth) + 34px));
+}
+.region-scenery[data-encounter=boss] .battle-hud {border-color:#d2a078}
+.region-scenery[data-encounter=boss] .battle-plate[data-side=enemy],
+.region-scenery[data-encounter=boss] .battle-info[data-side=enemy] .battle-plate {border-color:#cc906d}
+.arena-place {display:block;color:#dcc49c;font-size:11px;letter-spacing:.07em;margin:0 0 1px}
+.region-vista {
+  position:relative;isolation:isolate;display:grid;align-content:end;
+  min-height:104px;box-sizing:border-box;padding:9px 12px;
+  border:1px solid var(--metal);background:#24251e var(--region-view) center 52%/cover no-repeat;
+}
+.region-vista::before {
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(90deg,#161812ee,transparent 92%),linear-gradient(0deg,#1518119c,transparent 72%);
+  box-shadow:inset 0 0 0 3px #e9c58425;
+}
+.region-vista .gold {margin:0 0 3px;color:var(--metal);font-size:11px;letter-spacing:.09em}
+.region-vista .region-title {margin:0;color:#fff1d8;text-shadow:0 2px 2px #0a0c09;line-height:1.28}
+.region-vista .region-art {width:27px;height:27px}
+@media(max-width:600px){
+  .scene.battle-arena.region-scenery[data-cat] {--plate-depth:59px}
+  .region-vista {min-height:88px;padding:7px 9px}
+  .region-vista .region-art {width:24px;height:24px}
+}
+@media(max-height:540px){.region-vista{min-height:65px}}
