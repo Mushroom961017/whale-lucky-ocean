@@ -1,0 +1,41 @@
+/* The guild board: pending work and its rewards, at a glance. */
+.menu-summary>.menu-today .menu-today-meter {
+  display:block;height:3px;margin-top:4px;border:0;background:#151b17;
+  color:#abd3a7;appearance:none;width:100%;
+}
+.menu-today-meter::-webkit-progress-bar {background:#151b17}
+.menu-today-meter::-webkit-progress-value {background:#abd3a7}
+.menu-today-meter::-moz-progress-bar {background:#abd3a7}
+.menu-summary>.menu-today[data-state=done] {border-color:#83a288;background:linear-gradient(140deg,#303d2c,#252820)}
+.menu-summary>.menu-today[data-state=done] b {color:#d6e8c8}
+.daily-board-title:focus-visible,.daily-page-number:focus-visible {outline:2px solid #f1ce8e;outline-offset:3px}
+.daily-remaining {
+  display:flex;align-items:baseline;justify-content:space-between;gap:4px 10px;flex-wrap:wrap;
+  min-width:0;margin:6px 0 0;padding:5px 7px;border-left:2px solid #c1a16b;
+  background:#191d17;color:#e4d5b7;font-size:12px;
+}
+.daily-remaining b {color:#f8dfa6;font-variant-numeric:tabular-nums}
+.daily-remaining[data-state=done] {border-color:#8cb393;color:#d3e7cc}
+.daily-entry {min-height:52px}
+.daily-entry.daily-done {border-left-color:#91b698;background:#24342ac9}
+.daily-entry .daily-state {color:#ddf1d5}
+.daily-entry-copy {padding-block:2px}
+.daily-entry .daily-goal {margin:1px 0 4px;color:#d0c8b6}
+.daily-entry .daily-reward {
+  display:flex;align-items:center;flex-wrap:wrap;gap:3px;color:#eed6a3;font-size:11px;
+}
+.daily-reward span {
+  display:inline-block;padding:0 4px;border:1px solid #7d6747;background:#2d271e;
+  line-height:1.35;font-variant-numeric:tabular-nums;
+}
+.daily-done .daily-reward {color:#e2ecd7}
+.daily-done .daily-reward span {border-color:#64866d;background:#1a2b21}
+.daily-paging .daily-page-number {color:#e5d2ad;font-variant-numeric:tabular-nums}
+#reward-feedback {
+  background:#203129f5;border-color:#9fbc94;color:#e8f3d8;box-shadow:0 4px 12px #0208059c;
+}
+@media(max-width:600px) {
+  .daily-remaining {padding-inline:5px}
+  .daily-entry {gap:5px}
+  .daily-entry .daily-state {white-space:normal;text-align:right}
+}
