@@ -1,0 +1,8 @@
+.warden-card{display:grid;grid-template-columns:82px minmax(0,1fr);align-items:center;gap:12px;margin:8px 0;padding:6px 10px;border:1px solid #786449;background:linear-gradient(110deg,#373027,#1c201c 80%)}
+.warden-card img{display:block;width:82px;height:76px;object-fit:contain;filter:drop-shadow(0 2px 2px #121310)}
+.warden-card small{margin:0;color:#ddc290;font-size:11px;letter-spacing:.08em}
+.warden-card h3{margin:2px 0;font-family:var(--travel-serif);color:#ffebc4}
+.warden-card p,.region-dialog .warden-route{color:#d8cbb5;margin:2px 0;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+.warden-route-count{margin:7px 0 0;color:#d6c39f;font-size:13px}
+.region-goal .warden-route{padding-left:6px;border-left:2px solid #b99b68}
+@media(max-width:600px){.warden-card{grid-template-columns:66px minmax(0,1fr);gap:7px;padding:4px 7px}.warden-card img{width:66px;height:64px}}
